@@ -8,6 +8,7 @@ import { DeleteProfileButton } from "@/components/DeleteProfileButton";
 import { getPitch, leaderboard } from "@/db/queries";
 import { requireAdmin } from "@/lib/auth";
 import { formatTime } from "@/lib/format";
+import { INTEREST_OPTIONS, labelsFor, STUDY_OPTIONS } from "@/lib/profile-options";
 import { MAX_TOTAL } from "@/lib/scoring";
 import { isValidId } from "@/lib/validation";
 import { ScoreForm } from "../../ScoreForm";
@@ -60,6 +61,18 @@ export default async function AdminPitchPage({ params }: Props) {
               <p className="font-mono text-[11px] font-bold uppercase tracking-[0.16em] text-brand-deep">Pitch by</p>
               <h1 className="text-3xl font-black tracking-tight">{profile.name}</h1>
               {profile.tagline ? <p className="text-sm text-muted">{profile.tagline}</p> : null}
+              <ul className="mt-2 flex flex-wrap gap-1.5">
+                {labelsFor(STUDY_OPTIONS, profile.studies).map((label) => (
+                  <li key={label} className="rounded-full border border-line bg-white px-2.5 py-0.5 text-xs font-semibold">
+                    {label}
+                  </li>
+                ))}
+                {labelsFor(INTEREST_OPTIONS, profile.interests).map((label) => (
+                  <li key={label} className="rounded-full bg-brand/25 px-2.5 py-0.5 text-xs font-semibold">
+                    {label}
+                  </li>
+                ))}
+              </ul>
               <p className="mt-2 inline-flex items-center gap-1.5 text-xs text-muted">
                 <Clock className="size-3.5" aria-hidden /> Submitted {formatTime(pitch.createdAt)}
                 {pitch.updatedAt !== pitch.createdAt ? `, edited ${formatTime(pitch.updatedAt)}` : ""}

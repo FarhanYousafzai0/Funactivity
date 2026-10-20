@@ -1,4 +1,5 @@
 import { randomUUID } from "node:crypto";
+import { INTEREST_OPTIONS, pickKeys, STUDY_OPTIONS } from "@/lib/profile-options";
 import { rankEntries, totalScore, type ScoreInput } from "@/lib/scoring";
 import { getDb } from "./client";
 import { ensureSchema } from "./schema";
@@ -11,7 +12,9 @@ export type Profile = {
   id: string;
   name: string;
   tagline: string | null;
-  photoStyle: string | null;
+    photoStyle: string | null;
+  studies: string[];
+  interests: string[];
   hasPhoto: boolean;
   hidden: boolean;
   createdAt: string;
@@ -63,6 +66,8 @@ type ProfileRow = {
   name: string;
   tagline: string | null;
   photoStyle: string | null;
+  studies: string | null;
+  interests: string | null;
   hasPhoto: number;
   hidden: number;
   createdAt: string;
@@ -71,25 +76,34 @@ type ProfileRow = {
 };
 
 const PROFILE_COLUMNS =
-  "p.id, p.name, p.tagline, p.photo_style AS photoStyle, (p.photo IS NOT NULL) AS hasPhoto, p.hidden, p.created_at AS createdAt";
+  "p.id, p.name, p.tagline, p.photo_style AS photoStyle, p.studies, p.interests, (p.photo IS NOT NULL) AS hasPhoto, p.hidden, p.created_at AS createdAt";
 
 function toProfile(row: ProfileRow): Profile {
   return {
     id: row.id,
     name: row.name,
     tagline: row.tagline,
-    photoStyle: row.photoStyle,
+        photoStyle: row.photoStyle,
+    studies: pickKeys(STUDY_OPTIONS, row.studies),
+    interests: pickKeys(INTEREST_OPTIONS, row.interests),
     hasPhoto: Boolean(row.hasPhoto),
     hidden: Boolean(row.hidden),
     createdAt: row.createdAt,
   };
 }
 
-export async function createProfile(input: { name: string; tagline: string | null; photo: string; photoStyle: string }) {
+export async function createProfile(input: {
+  name: string;
+  tagline: string | null;
+  photo: string;
+  photoStyle: string;
+  studies: string[];
+  interests: string[];
+}) {
   const id = newId();
   await (await db())
-    .prepare("INSERT INTO profiles (id, name, tagline, photo, photo_style, hidden, created_at) VALUES (?, ?, ?, ?, ?, 0, ?)")
-    .bind(id, input.name, input.tagline, input.photo, input.photoStyle, now())
+    .prepare("INSERT INTO profiles (id, name, tagline, photo, photo_style, studies, interests, hidden, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, 0, ?)")
+    .bind(id, input.name, input.tagline, input.photo, input.photoStyle, JSON.stringify(input.studies), JSON.stringify(input.interests), now())
     .run();
   return id;
 }
@@ -146,7 +160,9 @@ type EntryRow = {
   updatedAt: string;
   pName: string;
   pTagline: string | null;
-  pPhotoStyle: string | null;
+    pPhotoStyle: string | null;
+  pStudies: string | null;
+  pInterests: string | null;
   pHasPhoto: number;
   pHidden: number;
   pCreatedAt: string;
@@ -161,7 +177,7 @@ type EntryRow = {
 const ENTRY_SELECT = `
   SELECT t.id, t.profile_id AS profileId, t.title, t.problem, t.audience, t.solution,
          t.created_at AS createdAt, t.updated_at AS updatedAt,
-         p.name AS pName, p.tagline AS pTagline, p.photo_style AS pPhotoStyle,
+         p.name AS pName, p.tagline AS pTagline, p.photo_style AS pPhotoStyle, p.studies AS pStudies, p.interests AS pInterests,
          (p.photo IS NOT NULL) AS pHasPhoto, p.hidden AS pHidden, p.created_at AS pCreatedAt,
          s.problem AS sProblem, s.solution AS sSolution, s.ai_use AS sAiUse, s.clarity AS sClarity,
          s.note AS sNote, s.scored_at AS scoredAt
@@ -189,7 +205,9 @@ function toEntry(row: EntryRow): PitchEntry {
       id: row.profileId,
       name: row.pName,
       tagline: row.pTagline,
-      photoStyle: row.pPhotoStyle,
+            photoStyle: row.pPhotoStyle,
+      studies: pickKeys(STUDY_OPTIONS, row.pStudies),
+      interests: pickKeys(INTEREST_OPTIONS, row.pInterests),
       hasPhoto: Boolean(row.pHasPhoto),
       hidden: Boolean(row.pHidden),
       createdAt: row.pCreatedAt,

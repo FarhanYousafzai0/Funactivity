@@ -1,10 +1,11 @@
 "use client";
 
-import { ExternalLink, Sparkles, Upload } from "lucide-react";
+import { Check, ExternalLink, Sparkles, Upload } from "lucide-react";
 import { useActionState, useState } from "react";
 import { createProfileAction, type ProfileFormState } from "@/app/actions/profile";
 import { CopyButton } from "@/components/CopyButton";
 import { AI_TOOLS, buildPhotoPrompt, PHOTO_STYLES, type PhotoStyleKey } from "@/lib/photo-prompt";
+import { INTEREST_OPTIONS, MAX_INTERESTS, STUDY_OPTIONS } from "@/lib/profile-options";
 import { LIMITS, PHOTO_MAX_BYTES } from "@/lib/validation";
 
 const PHOTO_SIZE = 512;
@@ -35,17 +36,62 @@ const fieldClass =
   "mt-1 w-full rounded-2xl border border-line bg-white px-4 py-3 text-base outline-none transition focus:border-brand-deep focus:ring-4 focus:ring-brand/25";
 const stepClass = "rounded-3xl border border-line bg-white/85 p-5 shadow-[0_24px_60px_rgba(7,17,13,0.06)] backdrop-blur sm:p-6";
 
+/** Checkbox chips. Real <input type="checkbox"> elements so the values travel with the form. */
+function ChipGroup({
+  name,
+  options,
+  selected,
+  onToggle,
+  full = false,
+}: {
+  name: string;
+  options: readonly { key: string; label: string }[];
+  selected: string[];
+  onToggle: (key: string) => void;
+  full?: boolean;
+}) {
+  return (
+    <div className="mt-2 flex flex-wrap gap-2">
+      {options.map((option) => {
+        const checked = selected.includes(option.key);
+        const disabled = full && !checked;
+        return (
+          <label
+            key={option.key}
+            className={`inline-flex cursor-pointer select-none items-center gap-1.5 rounded-full border px-3.5 py-2 text-sm font-semibold transition hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.97] has-[:focus-visible]:ring-4 has-[:focus-visible]:ring-brand/30 ${
+              checked ? "border-ink bg-ink text-white" : "border-line bg-white hover:border-brand-deep"
+            } ${disabled ? "cursor-not-allowed opacity-40 hover:translate-y-0 hover:border-line" : ""}`}
+          >
+            <input type="checkbox" name={name} value={option.key} checked={checked} disabled={disabled} onChange={() => onToggle(option.key)} className="sr-only" />
+            <span className={`grid size-4 place-items-center rounded-full border ${checked ? "border-brand bg-brand text-ink" : "border-line"}`}>
+              {checked ? <Check className="size-3" aria-hidden /> : null}
+            </span>
+            {option.label}
+          </label>
+        );
+      })}
+    </div>
+  );
+}
+
 export function ProfileForm({ next }: { next: string }) {
   const [state, formAction, pending] = useActionState<ProfileFormState, FormData>(createProfileAction, { error: null });
   const [name, setName] = useState("");
   const [tagline, setTagline] = useState("");
   const [style, setStyle] = useState<PhotoStyleKey | null>(null);
+  const [studies, setStudies] = useState<string[]>([]);
+  const [interests, setInterests] = useState<string[]>([]);
   const [photo, setPhoto] = useState<string | null>(null);
   const [photoError, setPhotoError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
   const prompt = style ? buildPhotoPrompt(style) : "";
-  const ready = name.trim().length > 0 && Boolean(style) && Boolean(photo) && !busy;
+  const ready = name.trim().length > 0 && studies.length > 0 && interests.length > 0 && Boolean(style) && Boolean(photo) && !busy;
+
+  function toggle(list: string[], key: string, max = Infinity) {
+    if (list.includes(key)) return list.filter((item) => item !== key);
+    return list.length >= max ? list : [...list, key];
+  }
 
   async function onFile(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
@@ -105,9 +151,32 @@ export function ProfileForm({ next }: { next: string }) {
         </label>
       </section>
 
-      {/* 2 · Prompt */}
+      {/* 2 · Studies + interests */}
         <section className={stepClass}>
-          <h2 className="text-lg font-black">2 · Make your photo with AI</h2>
+          <h2 className="text-lg font-black">2 · About you</h2>
+          <fieldset className="mt-3">
+            <legend className="text-sm font-semibold">
+              What are you studying right now? <span className="font-normal text-muted">(tick all that apply)</span>
+            </legend>
+            <ChipGroup name="studies" options={STUDY_OPTIONS} selected={studies} onToggle={(key) => setStudies(toggle(studies, key))} />
+          </fieldset>
+          <fieldset className="mt-5">
+            <legend className="text-sm font-semibold">
+              What do you want to become? <span className="font-normal text-muted">(up to {MAX_INTERESTS})</span>
+            </legend>
+            <ChipGroup
+              name="interests"
+              options={INTEREST_OPTIONS}
+              selected={interests}
+              onToggle={(key) => setInterests(toggle(interests, key, MAX_INTERESTS))}
+              full={interests.length >= MAX_INTERESTS}
+            />
+          </fieldset>
+        </section>
+
+        {/* 3 · Prompt */}
+        <section className={stepClass}>
+          <h2 className="text-lg font-black">3 · Make your photo with AI</h2>
           <p className="mt-1 text-sm leading-6 text-muted">
             Choose male or female to get the right prompt. Copy it, open ChatGPT or Gemini, attach a photo of yourself, paste the prompt, and
             download the picture it makes.
@@ -152,9 +221,9 @@ export function ProfileForm({ next }: { next: string }) {
           )}
         </section>
 
-        {/* 3 · Upload */}
+        {/* 4 · Upload */}
       <section className={stepClass}>
-        <h2 className="text-lg font-black">3 · Upload the picture</h2>
+        <h2 className="text-lg font-black">4 · Upload the picture</h2>
         <div className="mt-4 flex flex-col items-center gap-4 sm:flex-row">
           <div className="flex size-32 shrink-0 items-center justify-center overflow-hidden rounded-full border-2 border-dashed border-line bg-mint">
             {photo ? (

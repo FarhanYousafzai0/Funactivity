@@ -9,6 +9,7 @@ import { leaderboard, listProfiles, stats } from "@/db/queries";
 import { requireAdmin } from "@/lib/auth";
 import { formatTime } from "@/lib/format";
 import { paginate, parsePage } from "@/lib/paginate";
+import { INTEREST_OPTIONS, labelsFor, STUDY_OPTIONS } from "@/lib/profile-options";
 import { MAX_TOTAL, RUBRIC } from "@/lib/scoring";
 
 export const metadata: Metadata = { title: "Judges" };
@@ -233,10 +234,11 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
         </div>
         <p className="mt-1 text-sm text-muted">Hide removes a student from the arena and the board without deleting anything. Delete removes them, their pitch and score for good.</p>
         <div className="mt-3 overflow-x-auto rounded-3xl border border-line bg-white/85 shadow-[0_20px_55px_rgba(14,50,33,0.06)]">
-          <table className="w-full min-w-[640px] text-sm">
+          <table className="w-full min-w-[760px] text-sm">
             <thead className="border-b border-line">
               <tr>
                 <th className={th}>Student</th>
+                <th className={th}>Studying · wants to become</th>
                 <th className={`${th} w-28`}>Joined</th>
                 <th className={`${th} w-32`}>Status</th>
                 <th className={`${th} w-60`} />
@@ -253,6 +255,10 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
                         {profile.tagline ? <p className="text-xs text-muted">{profile.tagline}</p> : null}
                       </div>
                     </div>
+                  </td>
+                  <td className="px-4 py-2.5 text-xs">
+                    <p className="text-ink">{labelsFor(STUDY_OPTIONS, profile.studies).join(", ") || <span className="text-muted">–</span>}</p>
+                    <p className="text-muted">{labelsFor(INTEREST_OPTIONS, profile.interests).join(", ")}</p>
                   </td>
                   <td className="px-4 py-2.5 text-xs text-muted">{formatTime(profile.createdAt)}</td>
                   <td className="px-4 py-2.5 text-xs text-muted">
@@ -278,7 +284,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
               ))}
               {students.items.length === 0 ? (
                 <tr>
-                  <td colSpan={4} className="px-4 py-6 text-center text-sm text-muted">
+                  <td colSpan={5} className="px-4 py-6 text-center text-sm text-muted">
                     No students yet.
                   </td>
                 </tr>

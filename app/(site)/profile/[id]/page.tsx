@@ -7,6 +7,7 @@ import { Avatar } from "@/components/Avatar";
 import { getPitchForProfile, getProfile } from "@/db/queries";
 import { currentProfileId, isAdmin } from "@/lib/auth";
 import { firstName, formatTime } from "@/lib/format";
+import { INTEREST_OPTIONS, labelsFor, STUDY_OPTIONS } from "@/lib/profile-options";
 import { MAX_TOTAL } from "@/lib/scoring";
 import { isValidId } from "@/lib/validation";
 
@@ -23,6 +24,40 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 const primaryButton =
   "inline-flex h-12 items-center justify-center gap-2 rounded-full bg-brand px-6 font-bold text-ink shadow-[0_18px_48px_rgba(0,239,139,0.25)] transition hover:-translate-y-0.5 hover:bg-ink hover:text-white active:translate-y-0 active:scale-[0.98]";
 const ghostButton = "inline-flex h-12 items-center justify-center gap-2 rounded-full border border-line bg-white px-6 font-semibold transition hover:-translate-y-0.5 hover:border-brand-deep active:translate-y-0";
+
+function ProfileTags({ profile }: { profile: { studies: string[]; interests: string[] } }) {
+  const studies = labelsFor(STUDY_OPTIONS, profile.studies);
+  const interests = labelsFor(INTEREST_OPTIONS, profile.interests);
+  if (studies.length === 0 && interests.length === 0) return null;
+  return (
+    <div className="mt-4 space-y-3 text-left">
+      {studies.length > 0 ? (
+        <div>
+          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-muted">Studying</p>
+          <ul className="mt-1 flex flex-wrap gap-1.5">
+            {studies.map((label) => (
+              <li key={label} className="rounded-full border border-line bg-white px-3 py-1 text-xs font-semibold">
+                {label}
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
+      {interests.length > 0 ? (
+        <div>
+          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-muted">Wants to become</p>
+          <ul className="mt-1 flex flex-wrap gap-1.5">
+            {interests.map((label) => (
+              <li key={label} className="rounded-full bg-brand/25 px-3 py-1 text-xs font-semibold text-ink">
+                {label}
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
+    </div>
+  );
+}
 
 export default async function ProfilePage({ params, searchParams }: Props) {
   const [{ id }, { welcome }] = await Promise.all([params, searchParams]);
@@ -49,7 +84,8 @@ export default async function ProfilePage({ params, searchParams }: Props) {
         <p className="mt-3 font-mono text-[11px] font-bold uppercase tracking-[0.14em] text-muted">
           Joined at {formatTime(profile.createdAt)}
           {profile.hidden ? " · hidden by the judges" : ""}
-        </p>
+          </p>
+          <ProfileTags profile={profile} />
 
         {entry ? (
           <div className="mt-6 rounded-2xl border border-line bg-mint/60 p-4 text-left">

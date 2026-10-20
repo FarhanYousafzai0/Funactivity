@@ -9,6 +9,8 @@ export const SCHEMA_SQL = [
     tagline TEXT,
     photo TEXT,
     photo_style TEXT,
+    studies TEXT,
+    interests TEXT,
     hidden INTEGER NOT NULL DEFAULT 0,
     created_at TEXT NOT NULL
   )`,
@@ -33,12 +35,25 @@ export const SCHEMA_SQL = [
   )`,
 ];
 
+// Columns added after the first release. Databases created earlier get them via ALTER TABLE.
+export const PROFILE_COLUMNS_ADDED: { name: string; sql: string }[] = [
+  { name: "studies", sql: "ALTER TABLE profiles ADD COLUMN studies TEXT" },
+  { name: "interests", sql: "ALTER TABLE profiles ADD COLUMN interests TEXT" },
+];
+
+export async function applySchema(db: Database) {
+  for (const sql of SCHEMA_SQL) await db.prepare(sql).run();
+  const { results } = await db.prepare("PRAGMA table_info(profiles)").all<{ name: string }>();
+  const existing = new Set(results.map((column) => column.name));
+  for (const column of PROFILE_COLUMNS_ADDED) {
+    if (!existing.has(column.name)) await db.prepare(column.sql).run();
+  }
+}
+
 const shared = globalThis as typeof globalThis & { pitchArenaSchema?: Promise<void> };
 
 export function ensureSchema(db: Database) {
-  shared.pitchArenaSchema ??= (async () => {
-    for (const sql of SCHEMA_SQL) await db.prepare(sql).run();
-  })().catch((error) => {
+  shared.pitchArenaSchema ??= applySchema(db).catch((error) => {
     shared.pitchArenaSchema = undefined;
     throw error;
   });
