@@ -3,7 +3,7 @@
 import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { getPitch, saveScore, setProfileHidden } from "@/db/queries";
+import { deleteProfile, getPitch, saveScore, setProfileHidden } from "@/db/queries";
 import { ADMIN_COOKIE, adminPasswordValid, adminToken, cookieOptions, isAdmin } from "@/lib/auth";
 import { parseScore } from "@/lib/scoring";
 import { cleanText, isValidId, LIMITS, textError } from "@/lib/validation";
@@ -57,6 +57,17 @@ export async function setProfileHiddenAction(formData: FormData) {
   const id = formData.get("profileId");
   if (!isValidId(id)) return;
   await setProfileHidden(id, formData.get("hidden") === "1");
+  revalidatePath("/admin");
+  revalidatePath("/board");
+  revalidatePath("/");
+}
+
+/** Judges only: deletes the student, their pitch and score. Used to clear test accounts. */
+export async function deleteProfileAction(formData: FormData) {
+  if (!(await isAdmin())) redirect("/admin/login?next=/admin");
+  const id = formData.get("profileId");
+  if (!isValidId(id)) return;
+  await deleteProfile(id);
   revalidatePath("/admin");
   revalidatePath("/board");
   revalidatePath("/");

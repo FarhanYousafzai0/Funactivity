@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { adminLogoutAction, setProfileHiddenAction } from "@/app/actions/admin";
 import { Avatar } from "@/components/Avatar";
+import { DeleteProfileButton } from "@/components/DeleteProfileButton";
 import { leaderboard, listProfiles, stats } from "@/db/queries";
 import { requireAdmin } from "@/lib/auth";
 import { formatTime } from "@/lib/format";
@@ -112,6 +113,7 @@ export default async function AdminPage() {
                 <Link href={`/pitch/${entry.pitch.id}`} className="text-xs font-semibold text-muted underline-offset-4 hover:underline">
                   Open
                 </Link>
+<DeleteProfileButton profileId={entry.profile.id} name={entry.profile.name} />
               </header>
               <dl className="mt-4 grid gap-3 text-sm sm:grid-cols-3">
                 {[
@@ -162,6 +164,7 @@ export default async function AdminPage() {
                   {profile.hidden ? "Unhide" : "Hide"}
                 </button>
               </form>
+<DeleteProfileButton profileId={profile.id} name={profile.name} />
             </li>
           ))}
         </ul>

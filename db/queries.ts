@@ -123,6 +123,16 @@ export async function setProfileHidden(id: string, hidden: boolean) {
   await (await db()).prepare("UPDATE profiles SET hidden = ? WHERE id = ?").bind(hidden ? 1 : 0, id).run();
 }
 
+/** Removes the student, their pitch and its score for good. Explicit deletes, so it works even without FK enforcement. */
+export async function deleteProfile(id: string) {
+  const database = await db();
+  await database.batch([
+    database.prepare("DELETE FROM scores WHERE pitch_id IN (SELECT id FROM pitches WHERE profile_id = ?)").bind(id),
+    database.prepare("DELETE FROM pitches WHERE profile_id = ?").bind(id),
+    database.prepare("DELETE FROM profiles WHERE id = ?").bind(id),
+  ]);
+}
+
 // ---- Pitches (joined with their profile and score) ----
 
 type EntryRow = {
