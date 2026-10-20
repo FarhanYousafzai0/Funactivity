@@ -39,21 +39,26 @@ export default async function BoardPage() {
     <div className="relative z-[1] mx-auto w-full max-w-6xl px-5 py-6 sm:px-8">
       <AutoRefresh seconds={10} />
 
-      <header className="flex flex-wrap items-center justify-between gap-4 border-b border-line pb-5">
-        <div className="flex items-center gap-4">
-          <Image src="/ai-skool-logo-compact.svg" alt="AI SKOOL" width={190} height={38} priority className="h-8 w-auto sm:h-10" />
-          <div>
-            <p className="font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-brand-deep">NextGen AI Bootcamp · Pitch Arena</p>
-            <h1 className="text-3xl font-black tracking-tight sm:text-4xl">Live board</h1>
+      <header className="border-b border-line pb-6">
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <Link href="/" aria-label="Back to the Pitch Arena home page" className="inline-flex transition hover:-translate-y-0.5 hover:opacity-90">
+            <Image src="/ai-skool-logo-compact.svg" alt="AI SKOOL" width={190} height={38} priority className="h-8 w-auto sm:h-10" />
+          </Link>
+          <div className="flex items-center gap-4 text-sm text-muted">
+            <span className="inline-flex items-center gap-2 rounded-full border border-line bg-white/70 px-3 py-1.5 font-mono text-[11px] font-bold uppercase tracking-[0.1em] text-ink">
+              <span className="live-dot" /> Live · {formatTime(renderedAt)}
+            </span>
+            <Link href="/" className="inline-flex items-center gap-1 underline-offset-4 transition hover:text-ink hover:underline">
+              <ArrowLeft className="size-4" aria-hidden /> Exit
+            </Link>
           </div>
         </div>
-        <div className="flex items-center gap-4 text-sm text-muted">
-          <span className="inline-flex items-center gap-2 rounded-full border border-line bg-white/70 px-3 py-1.5 font-mono text-[11px] font-bold uppercase tracking-[0.1em] text-ink">
-            <span className="live-dot" /> Live · {formatTime(renderedAt)}
-          </span>
-          <Link href="/" className="inline-flex items-center gap-1 underline-offset-4 transition hover:text-ink hover:underline">
-            <ArrowLeft className="size-4" aria-hidden /> Exit
-          </Link>
+        <div className="mt-6">
+          <p className="font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-brand-deep">NextGen AI Bootcamp · Pitch Arena</p>
+          <h1 className="mt-1 text-4xl font-black tracking-tight sm:text-5xl">Live board</h1>
+          <p className="mt-2 max-w-2xl text-base leading-7 text-muted sm:text-lg">
+            Every pitch in the arena, ranked by the judges&apos; scores out of {MAX_TOTAL}. New scores appear here on their own, the board refreshes every 10 seconds.
+          </p>
         </div>
       </header>
 
