@@ -19,7 +19,7 @@ const FIELDS: { key: FieldKey; label: string; help: string; placeholder: string;
     label: "The problem",
     help: "What goes wrong today? Tell it like a story from real life.",
     placeholder: "e.g. Small clinics miss half their calls, so patients wait or go elsewhere…",
-    rows: 4,
+    rows: 6,
   },
   { key: "audience", label: "Who has this problem?", help: "Be specific: shopkeepers, students, mothers, farmers…", placeholder: "e.g. Family clinics with one receptionist" },
   {
@@ -27,14 +27,20 @@ const FIELDS: { key: FieldKey; label: string; help: string; placeholder: string;
     label: "How AI solves it",
     help: "What does the AI do, step by step, and why is it better than today?",
     placeholder: "e.g. A WhatsApp agent answers in Urdu, books the slot, reminds the patient…",
-    rows: 5,
+    rows: 8,
   },
 ];
 
 function Counter({ value, max }: { value: number; max: number }) {
+  const left = max - value;
+  const atLimit = left <= 0;
+  const nearLimit = !atLimit && left <= Math.max(20, Math.round(max * 0.1));
   return (
-    <span className={`mt-1 block text-right font-mono text-[10px] ${value > max ? "font-bold text-red-600" : "text-muted"}`}>
-      {value}/{max}
+    <span className={`mt-1 flex items-center justify-between gap-2 font-mono text-[10px] ${atLimit ? "font-bold text-red-600" : nearLimit ? "font-bold text-amber-600" : "text-muted"}`}>
+      <span className="font-sans">{atLimit ? "Limit reached. Shorten this a little to keep typing." : nearLimit ? `${left} characters left` : ""}</span>
+      <span>
+        {value}/{max}
+      </span>
     </span>
   );
 }
@@ -63,7 +69,7 @@ export function PitchForm({ defaults }: { defaults: Pitch | null }) {
                 value={values[field.key]}
                 onChange={(event) => setValues({ ...values, [field.key]: event.target.value })}
                 rows={field.rows}
-                maxLength={LIMITS[field.key] + 50}
+                maxLength={LIMITS[field.key]}
                 required
                 placeholder={field.placeholder}
                 className={`${fieldClass} resize-y`}
@@ -73,7 +79,7 @@ export function PitchForm({ defaults }: { defaults: Pitch | null }) {
                 name={field.key}
                 value={values[field.key]}
                 onChange={(event) => setValues({ ...values, [field.key]: event.target.value })}
-                maxLength={LIMITS[field.key] + 20}
+                maxLength={LIMITS[field.key]}
                 required
                 placeholder={field.placeholder}
                 className={fieldClass}

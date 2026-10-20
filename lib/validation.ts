@@ -2,11 +2,11 @@
 export const LIMITS = {
   name: 40,
   tagline: 60,
-  title: 60,
-  problem: 300,
-  audience: 150,
-  solution: 400,
-  note: 200,
+  title: 100,
+  problem: 1500,
+  audience: 400,
+  solution: 2000,
+  note: 300,
 } as const;
 
 export const PHOTO_MAX_BYTES = 300_000;
