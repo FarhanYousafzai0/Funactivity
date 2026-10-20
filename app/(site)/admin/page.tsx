@@ -5,7 +5,7 @@ import { Avatar } from "@/components/Avatar";
 import { leaderboard, listProfiles, stats } from "@/db/queries";
 import { requireAdmin } from "@/lib/auth";
 import { formatTime } from "@/lib/format";
-import { MAX_TOTAL } from "@/lib/scoring";
+import { MAX_TOTAL, RUBRIC } from "@/lib/scoring";
 import { ScoreForm } from "./ScoreForm";
 
 export const metadata: Metadata = { title: "Judges" };
@@ -57,24 +57,36 @@ export default async function AdminPage() {
         ) : (
           <ol className="mt-3 divide-y divide-line rounded-3xl border border-line bg-white/85">
             {ranked.map((entry) => (
-              <li key={entry.pitch.id} className={`flex items-center gap-4 px-5 py-3 ${entry.rank === 1 ? "bg-brand/15" : ""}`}>
-                <span className="w-8 font-mono text-lg font-black text-muted">{entry.rank}</span>
-                <Avatar profile={entry.profile} size="sm" />
-                <div className="min-w-0 flex-1">
-                  <p className="truncate font-bold">
-                    {entry.profile.name} {entry.rank === 1 ? <span className="ml-1 rounded-full bg-ink px-2 py-0.5 font-mono text-[9px] uppercase text-brand">Leading</span> : null}
-                  </p>
-                  <p className="truncate text-sm text-muted">{entry.pitch.title}</p>
-                </div>
-                <span className="text-2xl font-black">
-                  {entry.total}
-                  <span className="text-xs text-muted">/{MAX_TOTAL}</span>
-                </span>
-                <a href={`#pitch-${entry.pitch.id}`} className="text-xs font-semibold text-muted underline-offset-4 hover:underline">
-                  Edit
-                </a>
-              </li>
-            ))}
+                <li key={entry.pitch.id} className={`flex items-start gap-4 px-5 py-4 ${entry.rank === 1 ? "bg-brand/15" : ""}`}>
+                  <span className="w-8 shrink-0 pt-2 font-mono text-xl font-black text-muted">{entry.rank}</span>
+                  <Avatar profile={entry.profile} size="md" />
+                  <div className="min-w-0 flex-1">
+                    <p className="text-lg font-black">
+                      {entry.profile.name}
+                      {entry.rank === 1 ? <span className="ml-2 rounded-full bg-ink px-2 py-0.5 align-middle font-mono text-[9px] uppercase text-brand">Leading</span> : null}
+                    </p>
+                    {entry.profile.tagline ? <p className="text-xs text-muted">{entry.profile.tagline}</p> : null}
+                    <p className="mt-1 font-semibold text-brand-deep">{entry.pitch.title}</p>
+                    <p className="text-sm leading-6 text-ink/80">{entry.pitch.problem}</p>
+                    <ul className="mt-2 flex flex-wrap gap-x-3 gap-y-1 font-mono text-[11px] text-muted">
+                      {RUBRIC.map((item) => (
+                        <li key={item.key}>
+                          {item.label} <strong className="text-ink">{entry.score![item.key]}</strong>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                  <div className="shrink-0 text-right">
+                    <span className="font-mono text-3xl font-black">
+                      {entry.total}
+                      <span className="text-xs text-muted">/{MAX_TOTAL}</span>
+                    </span>
+                    <a href={`#pitch-${entry.pitch.id}`} className="block text-xs font-semibold text-muted underline-offset-4 hover:underline">
+                      Edit score
+                    </a>
+                  </div>
+                </li>
+              ))}
           </ol>
         )}
       </section>

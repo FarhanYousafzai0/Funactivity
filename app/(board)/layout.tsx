@@ -12,11 +12,14 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-// A second root layout just for the projector board: no header, no footer, dark background.
+// A second root layout just for the projector board: same light AI SKOOL look, no header or footer.
 export default function BoardLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={`${geistSans.variable} ${geistMono.variable} bg-ink`}>
-      <body className="min-h-svh bg-ink text-white">{children}</body>
+    <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
+      <body className="min-h-svh">
+        <div className="page-grid" aria-hidden />
+        {children}
+      </body>
     </html>
   );
 }

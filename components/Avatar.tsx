@@ -1,8 +1,8 @@
 const SIZES = {
-  sm: "size-10 text-sm",
-  md: "size-16 text-xl",
-  lg: "size-28 text-4xl",
-  xl: "size-40 text-5xl",
+  sm: "size-10 border-2 text-sm",
+  md: "size-16 border-[3px] text-xl",
+  lg: "size-28 border-4 text-4xl",
+  xl: "size-40 border-[5px] text-5xl",
 } as const;
 
 function initials(name: string) {
@@ -14,7 +14,10 @@ function initials(name: string) {
     .join("");
 }
 
-/** Profile photo served by /photo/[id]; falls back to initials when a profile has none (seed data). */
+/**
+ * Round profile photo with the white ring used on the AI SKOOL leaderboard.
+ * Served by /photo/[id]; falls back to initials when a profile has no photo (seed data).
+ */
 export function Avatar({
   profile,
   size = "md",
@@ -24,14 +27,14 @@ export function Avatar({
   size?: keyof typeof SIZES;
   className?: string;
 }) {
-  const base = `${SIZES[size]} shrink-0 rounded-full border-2 border-white bg-mint shadow-[0_8px_24px_rgba(7,17,13,0.12)] ${className}`;
+  const base = `${SIZES[size]} aspect-square shrink-0 overflow-hidden rounded-full border-white bg-brand shadow-[0_12px_30px_rgba(0,182,108,0.18)] ${className}`;
   if (profile.hasPhoto) {
     // The image is a data URL stored in our own database, so next/image optimisation has nothing to add.
     // eslint-disable-next-line @next/next/no-img-element
-    return <img src={`/photo/${profile.id}`} alt={profile.name} className={`${base} object-cover`} loading="lazy" />;
+    return <img src={`/photo/${profile.id}`} alt={profile.name} className={`${base} block object-cover object-top`} loading="lazy" />;
   }
   return (
-    <div className={`${base} flex items-center justify-center font-bold text-brand-deep`} aria-label={profile.name}>
+    <div className={`${base} flex items-center justify-center font-black text-ink`} aria-label={profile.name}>
       {initials(profile.name) || "?"}
     </div>
   );

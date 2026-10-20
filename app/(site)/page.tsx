@@ -134,7 +134,7 @@ export default async function HomePage() {
               <li key={profile.id}>
                 <Link href={profile.pitchId ? `/pitch/${profile.pitchId}` : `/profile/${profile.id}`} className="group flex flex-col items-center gap-2 text-center">
                   <Avatar profile={profile} size="md" className="transition group-hover:-translate-y-1" />
-                  <span className="line-clamp-1 text-sm font-semibold">{firstName(profile.name)}</span>
+                  <span className="line-clamp-2 text-sm font-semibold leading-tight">{profile.name}</span>
                   {profile.scored ? (
                     <span className="rounded-full bg-ink px-2 py-0.5 font-mono text-[9px] font-bold uppercase tracking-wider text-brand">Scored</span>
                   ) : profile.pitchId ? (
