@@ -10,8 +10,20 @@ import { cleanText, isValidId, LIMITS, textError } from "@/lib/validation";
 
 export type AdminFormState = { error: string | null; savedAt?: string };
 
-function safeNext(value: unknown) {
+/** Only paths inside the admin area, so a crafted form can never redirect elsewhere. */
+function safeAdminPath(value: unknown) {
   return typeof value === "string" && /^\/admin(\/[\w\-/?=&]*)?$/.test(value) ? value : "/admin";
+}
+
+/** Every public and admin view that lists students or scores. */
+function revalidateViews(pitchId?: string) {
+  revalidatePath("/admin");
+  revalidatePath("/board");
+  revalidatePath("/");
+  if (pitchId) {
+    revalidatePath(`/admin/pitch/${pitchId}`);
+    revalidatePath(`/pitch/${pitchId}`);
+  }
 }
 
 export async function adminLoginAction(_previous: AdminFormState, formData: FormData): Promise<AdminFormState> {
@@ -23,7 +35,7 @@ export async function adminLoginAction(_previous: AdminFormState, formData: Form
 
   const jar = await cookies();
   jar.set(ADMIN_COOKIE, adminToken()!, cookieOptions(60 * 60 * 12));
-  redirect(safeNext(formData.get("next")));
+  redirect(safeAdminPath(formData.get("next")));
 }
 
 export async function adminLogoutAction() {
@@ -46,9 +58,7 @@ export async function scorePitchAction(_previous: AdminFormState, formData: Form
   if (noteError) return { error: noteError };
 
   await saveScore(pitchId, score, note || null);
-  revalidatePath("/admin");
-  revalidatePath("/board");
-  revalidatePath(`/pitch/${pitchId}`);
+  revalidateViews(pitchId);
   return { error: null, savedAt: new Date().toISOString() };
 }
 
@@ -57,9 +67,8 @@ export async function setProfileHiddenAction(formData: FormData) {
   const id = formData.get("profileId");
   if (!isValidId(id)) return;
   await setProfileHidden(id, formData.get("hidden") === "1");
-  revalidatePath("/admin");
-  revalidatePath("/board");
-  revalidatePath("/");
+  const pitchId = formData.get("pitchId");
+  revalidateViews(isValidId(pitchId) ? pitchId : undefined);
 }
 
 /** Judges only: deletes the student, their pitch and score. Used to clear test accounts. */
@@ -68,7 +77,7 @@ export async function deleteProfileAction(formData: FormData) {
   const id = formData.get("profileId");
   if (!isValidId(id)) return;
   await deleteProfile(id);
-  revalidatePath("/admin");
-  revalidatePath("/board");
-  revalidatePath("/");
+  revalidateViews();
+  const next = formData.get("next");
+  if (typeof next === "string" && next) redirect(safeAdminPath(next));
 }

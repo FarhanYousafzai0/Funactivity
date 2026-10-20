@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { ArrowLeft, MonitorSmartphone, Server } from "lucide-react";
 import Link from "next/link";
 import { CopyButton } from "@/components/CopyButton";
 
@@ -25,7 +26,7 @@ const flow = [
 
 export default function LearnPage() {
   return (
-    <div className="mx-auto max-w-3xl space-y-10">
+    <div className="rise mx-auto max-w-3xl space-y-10">
       <header>
         <p className="font-mono text-[11px] font-bold uppercase tracking-[0.16em] text-brand-deep">For students</p>
         <h1 className="mt-2 text-4xl font-black tracking-tight">Server side vs client side</h1>
@@ -36,8 +37,8 @@ export default function LearnPage() {
       </header>
 
       <section className="grid gap-4 sm:grid-cols-2">
-        <div className="h-full rounded-3xl border border-line bg-white/85 p-5">
-          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-brand-deep">Server</p>
+        <div className="lift h-full rounded-3xl border border-line bg-white/85 p-5">
+          <p className="inline-flex items-center gap-1.5 font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-brand-deep"><Server className="size-3.5" aria-hidden /> Server</p>
           <h2 className="mt-1 text-xl font-black">Trusted, has the data</h2>
           <ul className="mt-2 list-disc space-y-1 pl-5 text-sm leading-6 text-muted">
             <li>Talks to the database (profiles, pitches, scores).</li>
@@ -46,8 +47,8 @@ export default function LearnPage() {
             <li>Sends HTML, so the page works before any JavaScript.</li>
           </ul>
         </div>
-        <div className="h-full rounded-3xl border border-line bg-white/85 p-5">
-          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-client">Client</p>
+        <div className="lift h-full rounded-3xl border border-line bg-white/85 p-5">
+          <p className="inline-flex items-center gap-1.5 font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-client"><MonitorSmartphone className="size-3.5" aria-hidden /> Client</p>
           <h2 className="mt-1 text-xl font-black">Fast, interactive, not trusted</h2>
           <ul className="mt-2 list-disc space-y-1 pl-5 text-sm leading-6 text-muted">
             <li>Reacts instantly: counters, previews, copy buttons.</li>
@@ -103,8 +104,8 @@ export default function LearnPage() {
           </p>
         <div className="mt-4 flex flex-wrap gap-3">
           <CopyButton text="Server = trusted computer with the data. Client = my browser, fast but not trusted." label="Copy the one-line summary" className="bg-brand text-ink hover:bg-white" />
-          <Link href="/" className="inline-flex h-11 items-center rounded-full border border-white/30 px-5 text-sm font-bold hover:bg-white/10">
-            Back to the arena
+          <Link href="/" className="inline-flex h-11 items-center gap-2 rounded-full border border-white/30 px-5 text-sm font-bold transition hover:-translate-y-0.5 hover:bg-white/10">
+              <ArrowLeft className="size-4" aria-hidden /> Back to the arena
           </Link>
         </div>
       </section>

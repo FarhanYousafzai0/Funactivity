@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { ArrowLeft, ArrowRight, Pencil, Rocket } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { forgetProfileAction } from "@/app/actions/profile";
@@ -20,8 +21,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 const primaryButton =
-  "inline-flex h-12 items-center justify-center rounded-full bg-brand px-6 font-bold text-ink shadow-[0_18px_48px_rgba(0,239,139,0.25)] transition hover:-translate-y-0.5 hover:bg-ink hover:text-white";
-const ghostButton = "inline-flex h-12 items-center justify-center rounded-full border border-line bg-white px-6 font-semibold transition hover:border-brand-deep";
+  "inline-flex h-12 items-center justify-center gap-2 rounded-full bg-brand px-6 font-bold text-ink shadow-[0_18px_48px_rgba(0,239,139,0.25)] transition hover:-translate-y-0.5 hover:bg-ink hover:text-white active:translate-y-0 active:scale-[0.98]";
+const ghostButton = "inline-flex h-12 items-center justify-center gap-2 rounded-full border border-line bg-white px-6 font-semibold transition hover:-translate-y-0.5 hover:border-brand-deep active:translate-y-0";
 
 export default async function ProfilePage({ params, searchParams }: Props) {
   const [{ id }, { welcome }] = await Promise.all([params, searchParams]);
@@ -34,7 +35,7 @@ export default async function ProfilePage({ params, searchParams }: Props) {
   const entry = await getPitchForProfile(profile.id);
 
   return (
-    <section className="mx-auto max-w-lg">
+    <section className="rise mx-auto max-w-lg">
       {welcome && owner ? (
         <p className="mb-4 rounded-2xl border border-brand-deep/30 bg-brand/15 px-4 py-3 text-center text-sm font-semibold">
           You are in the arena, {firstName(profile.name)}! Your profile is saved on the server.
@@ -56,7 +57,7 @@ export default async function ProfilePage({ params, searchParams }: Props) {
             <p className="mt-1 text-lg font-black">{entry.pitch.title}</p>
             <p className="mt-1 line-clamp-2 text-sm text-muted">{entry.pitch.problem}</p>
             <Link href={`/pitch/${entry.pitch.id}`} className="mt-3 inline-block text-sm font-bold underline-offset-4 hover:underline">
-              Read the pitch →
+              Read the pitch <ArrowRight className="inline size-3.5" aria-hidden />
             </Link>
           </div>
         ) : null}
@@ -66,7 +67,7 @@ export default async function ProfilePage({ params, searchParams }: Props) {
             {!entry ? (
               <>
                 <Link href="/pitch/new" className={primaryButton}>
-                  Pitch your idea now
+                    <Rocket className="size-4" aria-hidden /> Pitch your idea now
                 </Link>
                 <Link href="/" className={ghostButton}>
                   Maybe later
@@ -75,7 +76,7 @@ export default async function ProfilePage({ params, searchParams }: Props) {
               </>
             ) : !entry.score ? (
               <Link href="/pitch/new" className={ghostButton}>
-                Edit my pitch
+                  <Pencil className="size-4" aria-hidden /> Edit my pitch
               </Link>
             ) : null}
             <form action={forgetProfileAction}>
@@ -86,7 +87,7 @@ export default async function ProfilePage({ params, searchParams }: Props) {
           </div>
         ) : (
           <Link href="/" className={`${ghostButton} mt-6`}>
-            Back to the arena
+              <ArrowLeft className="size-4" aria-hidden /> Back to the arena
           </Link>
         )}
       </div>

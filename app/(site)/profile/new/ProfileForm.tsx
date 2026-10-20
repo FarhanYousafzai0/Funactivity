@@ -1,5 +1,6 @@
 "use client";
 
+import { ExternalLink, Sparkles, Upload } from "lucide-react";
 import { useActionState, useState } from "react";
 import { createProfileAction, type ProfileFormState } from "@/app/actions/profile";
 import { CopyButton } from "@/components/CopyButton";
@@ -67,7 +68,7 @@ export function ProfileForm({ next }: { next: string }) {
   }
 
   return (
-    <form action={formAction} className="space-y-5">
+    <form action={formAction} className="rise space-y-5">
       <input type="hidden" name="next" value={next} />
       <input type="hidden" name="photoStyle" value={style ?? ""} />
       <input type="hidden" name="photo" value={photo ?? ""} />
@@ -138,9 +139,9 @@ export function ProfileForm({ next }: { next: string }) {
                     href={tool.href}
                     target="_blank"
                     rel="noreferrer"
-                    className="inline-flex h-11 items-center rounded-full border border-line bg-white px-4 text-sm font-semibold transition hover:border-brand-deep"
+                    className="inline-flex h-11 items-center gap-2 rounded-full border border-line bg-white px-4 text-sm font-semibold transition hover:-translate-y-0.5 hover:border-brand-deep active:translate-y-0"
                   >
-                    Open {tool.name} ↗
+                    <ExternalLink className="size-4" aria-hidden /> Open {tool.name}
                   </a>
                 ))}
               </div>
@@ -164,8 +165,8 @@ export function ProfileForm({ next }: { next: string }) {
             )}
           </div>
           <div className="w-full">
-            <label className="inline-flex h-11 cursor-pointer items-center justify-center rounded-full border border-line bg-white px-5 text-sm font-bold transition hover:border-brand-deep">
-              {photo ? "Choose a different picture" : "Choose picture"}
+            <label className="inline-flex h-11 cursor-pointer items-center justify-center gap-2 rounded-full border border-line bg-white px-5 text-sm font-bold transition hover:-translate-y-0.5 hover:border-brand-deep active:translate-y-0">
+              <Upload className="size-4" aria-hidden /> {photo ? "Choose a different picture" : "Choose picture"}
               <input type="file" accept="image/*" onChange={onFile} className="sr-only" />
             </label>
             <p className="mt-2 text-xs leading-5 text-muted">
@@ -185,9 +186,9 @@ export function ProfileForm({ next }: { next: string }) {
       <button
         type="submit"
         disabled={!ready || pending}
-        className="inline-flex h-13 w-full items-center justify-center rounded-full bg-brand px-6 text-base font-black text-ink shadow-[0_18px_48px_rgba(0,239,139,0.25)] transition hover:-translate-y-0.5 hover:bg-ink hover:text-white disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:translate-y-0 disabled:hover:bg-brand disabled:hover:text-ink"
+        className="inline-flex h-13 w-full items-center justify-center gap-2 rounded-full bg-brand px-6 text-base font-black text-ink shadow-[0_18px_48px_rgba(0,239,139,0.25)] transition hover:-translate-y-0.5 hover:bg-ink hover:text-white disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:translate-y-0 disabled:hover:bg-brand disabled:hover:text-ink"
       >
-        {pending ? "Saving your profile…" : "Create my profile"}
+        <Sparkles className="size-4" aria-hidden /> {pending ? "Saving your profile…" : "Create my profile"}
       </button>
     </form>
   );

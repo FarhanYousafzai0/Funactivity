@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { ArrowLeft, Crown, Hourglass, Trophy } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { Avatar } from "@/components/Avatar";
@@ -50,8 +51,8 @@ export default async function BoardPage() {
           <span className="inline-flex items-center gap-2 rounded-full border border-line bg-white/70 px-3 py-1.5 font-mono text-[11px] font-bold uppercase tracking-[0.1em] text-ink">
             <span className="live-dot" /> Live · {formatTime(renderedAt)}
           </span>
-          <Link href="/" className="underline-offset-4 hover:text-ink hover:underline">
-            Exit
+          <Link href="/" className="inline-flex items-center gap-1 underline-offset-4 transition hover:text-ink hover:underline">
+            <ArrowLeft className="size-4" aria-hidden /> Exit
           </Link>
         </div>
       </header>
@@ -66,13 +67,13 @@ export default async function BoardPage() {
       ) : (
         <>
           {/* Podium: #1 in the middle, taller and in ink, like the leaderboard winner card. */}
-          <ol className="mt-10 grid gap-4 sm:grid-cols-3 sm:items-end">
+          <ol className="rise mt-10 grid gap-4 sm:grid-cols-3 sm:items-end">
             {podium.map((entry, index) => {
               const winner = index === 0;
               return (
                 <li
                   key={entry.pitch.id}
-                  className={`relative overflow-hidden rounded-3xl border p-6 text-center shadow-[0_20px_55px_rgba(14,50,33,0.07)] ${
+                  className={`lift relative overflow-hidden rounded-3xl border p-6 text-center shadow-[0_20px_55px_rgba(14,50,33,0.07)] ${
                     winner
                       ? "border-brand-deep/45 bg-ink text-white shadow-[0_28px_80px_rgba(0,182,108,0.2)] sm:order-2 sm:min-h-[340px]"
                       : `border-line bg-white/85 ${index === 1 ? "sm:order-1" : "sm:order-3"}`
@@ -82,7 +83,7 @@ export default async function BoardPage() {
                   <span className={`absolute left-4 top-4 inline-flex size-9 items-center justify-center rounded-full font-mono font-black ${medal[index]}`}>{entry.rank}</span>
                   <Avatar profile={entry.profile} size={winner ? "xl" : "lg"} className="relative mx-auto" />
                   <p className={`relative mt-3 font-mono text-[9px] font-black uppercase tracking-[0.17em] ${winner ? "text-gold" : "text-brand-deep"}`}>
-                    {entry.rank === 1 ? "Leading" : `Place ${entry.rank}`}
+                    {entry.rank === 1 ? <span className="inline-flex items-center gap-1"><Crown className="size-3.5" aria-hidden /> Leading</span> : `Place ${entry.rank}`}
                   </p>
                   <h2 className="relative mt-1 text-2xl font-black tracking-tight">{entry.profile.name}</h2>
                   {entry.profile.tagline ? <p className={`relative text-xs ${winner ? "text-white/60" : "text-muted"}`}>{entry.profile.tagline}</p> : null}
@@ -103,8 +104,8 @@ export default async function BoardPage() {
 
           {/* Everyone else: the dark ranking block from the leaderboard. */}
           {rest.length > 0 ? (
-            <section className="mt-8 rounded-[28px] bg-ink p-5 text-white shadow-[0_28px_85px_rgba(7,17,13,0.16)] sm:p-8">
-              <h2 className="text-2xl font-black tracking-tight sm:text-3xl">Full ranking</h2>
+            <section className="rise rise-2 mt-8 rounded-[28px] bg-ink p-5 text-white shadow-[0_28px_85px_rgba(7,17,13,0.16)] sm:p-8">
+              <h2 className="inline-flex items-center gap-2 text-2xl font-black tracking-tight sm:text-3xl"><Trophy className="size-6 text-brand" aria-hidden /> Full ranking</h2>
               <ol className="mt-4 divide-y divide-white/10">
                 {rest.map((entry) => (
                   <li key={entry.pitch.id} className="flex items-start gap-4 py-4">
@@ -132,7 +133,7 @@ export default async function BoardPage() {
 
       {waiting.length > 0 ? (
         <section className="mt-8">
-          <p className="font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-muted">Waiting for the judges · {waiting.length}</p>
+          <p className="inline-flex items-center gap-1.5 font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-muted"><Hourglass className="size-3.5" aria-hidden /> Waiting for the judges · {waiting.length}</p>
           <ul className="mt-3 flex flex-wrap gap-2">
             {waiting.map((entry) => (
               <li key={entry.pitch.id} className="inline-flex items-center gap-2 rounded-full border border-line bg-white/80 py-1 pl-1 pr-4 text-sm">

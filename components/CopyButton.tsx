@@ -1,5 +1,6 @@
 "use client";
 
+import { Check, Copy } from "lucide-react";
 import { useEffect, useState } from "react";
 
 /** Copies text to the clipboard. Clipboard access only exists in the browser, so this is a client component. */
@@ -32,8 +33,12 @@ export function CopyButton({ text, label = "Copy prompt", className = "" }: { te
     <button
       type="button"
       onClick={copy}
-      className={`inline-flex h-11 items-center justify-center gap-2 rounded-full bg-ink px-5 text-sm font-bold text-white transition hover:-translate-y-0.5 hover:bg-ink-soft ${className}`}
+      aria-live="polite"
+      className={`inline-flex h-11 items-center justify-center gap-2 rounded-full px-5 text-sm font-bold transition hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.97] ${
+        copied ? "bg-brand text-ink" : "bg-ink text-white hover:bg-ink-soft"
+      } ${className}`}
     >
+      {copied ? <Check className="size-4" aria-hidden /> : <Copy className="size-4" aria-hidden />}
       {copied ? "Copied!" : label}
     </button>
   );

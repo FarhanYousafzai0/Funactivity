@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { ArrowLeft, Hourglass, Pencil, Radio } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Avatar } from "@/components/Avatar";
@@ -30,7 +31,7 @@ export default async function PitchPage({ params, searchParams }: Props) {
   const { pitch, profile, score } = entry;
 
   return (
-    <article className="mx-auto max-w-2xl">
+    <article className="rise mx-auto max-w-2xl">
       {saved && owner ? (
         <p className="mb-4 rounded-2xl border border-brand-deep/30 bg-brand/15 px-4 py-3 text-center text-sm font-semibold">
           Your pitch is saved. The judges can see it now. Good luck!
@@ -57,7 +58,7 @@ export default async function PitchPage({ params, searchParams }: Props) {
           ["Who has it", pitch.audience],
           ["How AI solves it", pitch.solution],
         ].map(([label, text]) => (
-          <section key={label} className="rounded-3xl border border-line bg-white/85 p-5 backdrop-blur sm:p-6">
+          <section key={label} className="lift rounded-3xl border border-line bg-white/85 p-5 backdrop-blur sm:p-6">
             <h2 className="font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-brand-deep">{label}</h2>
             <p className="mt-2 whitespace-pre-line text-base leading-7">{text}</p>
           </section>
@@ -88,11 +89,11 @@ export default async function PitchPage({ params, searchParams }: Props) {
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
               <p className="font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-brand">Judges&apos; score</p>
-              <p className="mt-1 text-lg font-bold">Waiting for the judges…</p>
+              <p className="mt-1 inline-flex items-center gap-2 text-lg font-bold"><Hourglass className="size-4 text-brand" aria-hidden /> Waiting for the judges…</p>
             </div>
             {owner ? (
-              <Link href="/pitch/new" className="inline-flex h-11 items-center rounded-full border border-white/30 px-5 text-sm font-bold hover:bg-white/10">
-                Edit my pitch
+              <Link href="/pitch/new" className="inline-flex h-11 items-center gap-2 rounded-full border border-white/30 px-5 text-sm font-bold transition hover:-translate-y-0.5 hover:bg-white/10">
+                  <Pencil className="size-4" aria-hidden /> Edit my pitch
               </Link>
             ) : null}
           </div>
@@ -100,11 +101,11 @@ export default async function PitchPage({ params, searchParams }: Props) {
       </section>
 
       <div className="mt-6 flex flex-wrap gap-3">
-        <Link href="/board" className="inline-flex h-11 items-center rounded-full bg-brand px-5 text-sm font-bold text-ink">
-          Live board
+        <Link href="/board" className="inline-flex h-11 items-center gap-2 rounded-full bg-brand px-5 text-sm font-bold text-ink transition hover:-translate-y-0.5 hover:bg-ink hover:text-white active:translate-y-0">
+            <Radio className="size-4" aria-hidden /> Live board
         </Link>
-        <Link href="/" className="inline-flex h-11 items-center rounded-full border border-line bg-white px-5 text-sm font-semibold">
-          Back to the arena
+        <Link href="/" className="inline-flex h-11 items-center gap-2 rounded-full border border-line bg-white px-5 text-sm font-semibold transition hover:-translate-y-0.5 hover:border-brand-deep active:translate-y-0">
+            <ArrowLeft className="size-4" aria-hidden /> Back to the arena
         </Link>
       </div>
     </article>

@@ -1,5 +1,6 @@
 "use client";
 
+import { LogIn } from "lucide-react";
 import { useActionState } from "react";
 import { adminLoginAction, type AdminFormState } from "@/app/actions/admin";
 
@@ -24,8 +25,8 @@ export function AdminLoginForm({ next }: { next: string }) {
           {state.error}
         </p>
       ) : null}
-      <button type="submit" disabled={pending} className="inline-flex h-12 w-full items-center justify-center rounded-full bg-ink font-bold text-white disabled:opacity-50">
-        {pending ? "Checking…" : "Sign in"}
+      <button type="submit" disabled={pending} className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-full bg-ink font-bold text-white transition hover:-translate-y-0.5 hover:bg-ink-soft active:translate-y-0 active:scale-[0.98] disabled:opacity-50">
+        <LogIn className="size-4" aria-hidden /> {pending ? "Checking…" : "Sign in"}
       </button>
     </form>
   );

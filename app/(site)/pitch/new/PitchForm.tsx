@@ -1,5 +1,6 @@
 "use client";
 
+import { Send } from "lucide-react";
 import { useActionState, useState } from "react";
 import { savePitchAction, type PitchFormState } from "@/app/actions/pitch";
 import type { Pitch } from "@/db/queries";
@@ -50,7 +51,7 @@ export function PitchForm({ defaults }: { defaults: Pitch | null }) {
   const complete = FIELDS.every((field) => values[field.key].trim().length > 0 && values[field.key].length <= LIMITS[field.key]);
 
   return (
-    <form action={formAction} className="space-y-5">
+    <form action={formAction} className="rise space-y-5">
       <section className="rounded-3xl border border-line bg-white/85 p-5 shadow-[0_24px_60px_rgba(7,17,13,0.06)] backdrop-blur sm:p-6">
         {FIELDS.map((field) => (
           <label key={field.key} className="mt-4 block text-sm font-semibold first:mt-0">
@@ -103,9 +104,9 @@ export function PitchForm({ defaults }: { defaults: Pitch | null }) {
       <button
         type="submit"
         disabled={!complete || pending}
-        className="inline-flex h-13 w-full items-center justify-center rounded-full bg-brand px-6 text-base font-black text-ink shadow-[0_18px_48px_rgba(0,239,139,0.25)] transition hover:-translate-y-0.5 hover:bg-ink hover:text-white disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:translate-y-0 disabled:hover:bg-brand disabled:hover:text-ink"
+        className="inline-flex h-13 w-full items-center justify-center gap-2 rounded-full bg-brand px-6 text-base font-black text-ink shadow-[0_18px_48px_rgba(0,239,139,0.25)] transition hover:-translate-y-0.5 hover:bg-ink hover:text-white disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:translate-y-0 disabled:hover:bg-brand disabled:hover:text-ink"
       >
-        {pending ? "Sending to the judges…" : defaults ? "Save changes" : "Submit my pitch"}
+        <Send className="size-4" aria-hidden /> {pending ? "Sending to the judges…" : defaults ? "Save changes" : "Submit my pitch"}
       </button>
     </form>
   );
