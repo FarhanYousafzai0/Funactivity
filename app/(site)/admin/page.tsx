@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Eye, EyeOff, ExternalLink, Hourglass, Lightbulb, LogOut, Radio, Star, Trophy, Users } from "lucide-react";
+import { Eye, EyeOff, ExternalLink, Hourglass, Lightbulb, LogOut, QrCode, Radio, Star, Trophy, Users } from "lucide-react";
 import Link from "next/link";
 import { adminLogoutAction, setProfileHiddenAction } from "@/app/actions/admin";
 import { Avatar } from "@/components/Avatar";
@@ -53,6 +53,9 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
           <h1 className="mt-1 text-4xl font-black tracking-tight">Score the pitches</h1>
         </div>
         <div className="flex items-center gap-2">
+          <Link href="/join" className="inline-flex h-11 items-center gap-2 rounded-full border border-line bg-white px-4 text-sm font-semibold transition hover:-translate-y-0.5 hover:border-brand-deep active:translate-y-0">
+            <QrCode className="size-4" aria-hidden /> Join QR
+          </Link>
           <Link href="/board" className="inline-flex h-11 items-center gap-2 rounded-full bg-ink px-5 text-sm font-bold text-white transition hover:-translate-y-0.5 hover:bg-ink-soft active:translate-y-0">
             <Radio className="size-4 text-brand" aria-hidden /> Live board
           </Link>
