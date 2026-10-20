@@ -1,0 +1,192 @@
+"use client";
+
+import { useActionState, useMemo, useState } from "react";
+import { createProfileAction, type ProfileFormState } from "@/app/actions/profile";
+import { Boundary } from "@/components/Boundary";
+import { CopyButton } from "@/components/CopyButton";
+import { AI_TOOLS, buildPhotoPrompt, PHOTO_STYLES, type PhotoStyleKey } from "@/lib/photo-prompt";
+import { LIMITS, PHOTO_MAX_BYTES } from "@/lib/validation";
+
+const PHOTO_SIZE = 512;
+
+/**
+ * Shrinks any picture to a 512×512 JPEG in the browser (centre crop), so a 4 MB download from
+ * ChatGPT becomes ~80 KB before it is ever sent to the server. Tries lower quality until it fits.
+ */
+async function resizeToDataUrl(file: File) {
+  const bitmap = await createImageBitmap(file);
+  const canvas = document.createElement("canvas");
+  canvas.width = PHOTO_SIZE;
+  canvas.height = PHOTO_SIZE;
+  const context = canvas.getContext("2d")!;
+  const side = Math.min(bitmap.width, bitmap.height);
+  const sx = (bitmap.width - side) / 2;
+  const sy = (bitmap.height - side) / 2;
+  context.drawImage(bitmap, sx, sy, side, side, 0, 0, PHOTO_SIZE, PHOTO_SIZE);
+  bitmap.close();
+  for (const quality of [0.86, 0.72, 0.58, 0.45]) {
+    const dataUrl = canvas.toDataURL("image/jpeg", quality);
+    if (dataUrl.length * 0.75 <= PHOTO_MAX_BYTES) return dataUrl;
+  }
+  throw new Error("too-large");
+}
+
+const fieldClass =
+  "mt-1 w-full rounded-2xl border border-line bg-white px-4 py-3 text-base outline-none transition focus:border-brand-deep focus:ring-4 focus:ring-brand/25";
+const stepClass = "rounded-3xl border border-line bg-white/85 p-5 shadow-[0_24px_60px_rgba(7,17,13,0.06)] backdrop-blur sm:p-6";
+
+export function ProfileForm({ next }: { next: string }) {
+  const [state, formAction, pending] = useActionState<ProfileFormState, FormData>(createProfileAction, { error: null });
+  const [name, setName] = useState("");
+  const [tagline, setTagline] = useState("");
+  const [style, setStyle] = useState<PhotoStyleKey>("3d");
+  const [photo, setPhoto] = useState<string | null>(null);
+  const [photoError, setPhotoError] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+
+  const prompt = useMemo(() => buildPhotoPrompt(style, name), [style, name]);
+  const ready = name.trim().length > 0 && Boolean(photo) && !busy;
+
+  async function onFile(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    setPhotoError(null);
+    setBusy(true);
+    try {
+      if (!file.type.startsWith("image/")) throw new Error("not-image");
+      setPhoto(await resizeToDataUrl(file));
+    } catch (error) {
+      setPhoto(null);
+      setPhotoError(
+        error instanceof Error && error.message === "not-image"
+          ? "That file is not an image. Pick the PNG or JPG you downloaded."
+          : "We could not read that picture. Try saving it again as PNG or JPG.",
+      );
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <Boundary kind="client" label="this form runs in your browser: typing, copying, resizing the photo">
+      <form action={formAction} className="space-y-5">
+        <input type="hidden" name="next" value={next} />
+        <input type="hidden" name="photoStyle" value={style} />
+        <input type="hidden" name="photo" value={photo ?? ""} />
+
+        {/* 1 · Name */}
+        <section className={stepClass}>
+          <h2 className="text-lg font-black">1 · Who are you?</h2>
+          <label className="mt-3 block text-sm font-semibold">
+            Your name
+            <input
+              name="name"
+              value={name}
+              onChange={(event) => setName(event.target.value)}
+              maxLength={LIMITS.name}
+              required
+              autoComplete="name"
+              placeholder="e.g. Ayesha Khan"
+              className={fieldClass}
+            />
+          </label>
+          <label className="mt-3 block text-sm font-semibold">
+            One line about you <span className="font-normal text-muted">(optional)</span>
+            <input
+              name="tagline"
+              value={tagline}
+              onChange={(event) => setTagline(event.target.value)}
+              maxLength={LIMITS.tagline}
+              placeholder="e.g. FSc student from Nowshera, loves football"
+              className={fieldClass}
+            />
+            <span className="mt-1 block text-right font-mono text-[10px] text-muted">
+              {tagline.length}/{LIMITS.tagline}
+            </span>
+          </label>
+        </section>
+
+        {/* 2 · Prompt */}
+        <section className={stepClass}>
+          <h2 className="text-lg font-black">2 · Make your photo with AI</h2>
+          <p className="mt-1 text-sm leading-6 text-muted">
+            Pick a style, copy the prompt, paste it into ChatGPT or Gemini together with a selfie, and download the picture it makes.
+          </p>
+          <div className="mt-4 grid grid-cols-3 gap-2">
+            {PHOTO_STYLES.map((item) => (
+              <button
+                key={item.key}
+                type="button"
+                onClick={() => setStyle(item.key)}
+                aria-pressed={style === item.key}
+                className={`rounded-2xl border px-2 py-3 text-center text-sm font-semibold transition ${
+                  style === item.key ? "border-brand-deep bg-ink text-white" : "border-line bg-white hover:border-brand-deep"
+                }`}
+              >
+                <span className="block text-2xl">{item.emoji}</span>
+                <span className="mt-1 block">{item.label}</span>
+              </button>
+            ))}
+          </div>
+          <textarea readOnly value={prompt} rows={6} className={`${fieldClass} mt-4 resize-none bg-mint/60 text-sm leading-6`} aria-label="Photo prompt" />
+          <div className="mt-3 flex flex-wrap items-center gap-2">
+            <CopyButton text={prompt} />
+            {AI_TOOLS.map((tool) => (
+              <a
+                key={tool.name}
+                href={tool.href}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex h-11 items-center rounded-full border border-line bg-white px-4 text-sm font-semibold transition hover:border-brand-deep"
+              >
+                Open {tool.name} ↗
+              </a>
+            ))}
+          </div>
+          <p className="mt-3 text-xs leading-5 text-muted">
+            Tip: attach a clear selfie before you send the prompt. Prefer not to use your face? Replace the selfie line with a short description of yourself.
+          </p>
+        </section>
+
+        {/* 3 · Upload */}
+        <section className={stepClass}>
+          <h2 className="text-lg font-black">3 · Upload the picture</h2>
+          <div className="mt-4 flex flex-col items-center gap-4 sm:flex-row">
+            <div className="flex size-32 shrink-0 items-center justify-center overflow-hidden rounded-full border-2 border-dashed border-line bg-mint">
+              {photo ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={photo} alt="Your profile photo" className="size-full object-cover" />
+              ) : (
+                <span className="px-3 text-center text-xs text-muted">{busy ? "Resizing…" : "Your photo appears here"}</span>
+              )}
+            </div>
+            <div className="w-full">
+              <label className="inline-flex h-11 cursor-pointer items-center justify-center rounded-full border border-line bg-white px-5 text-sm font-bold transition hover:border-brand-deep">
+                {photo ? "Choose a different picture" : "Choose picture"}
+                <input type="file" accept="image/*" onChange={onFile} className="sr-only" />
+              </label>
+              <p className="mt-2 text-xs leading-5 text-muted">
+                PNG or JPG from ChatGPT or Gemini. Your browser shrinks it to 512×512 before upload, so even a big download is fine.
+              </p>
+              {photoError ? <p className="mt-2 text-sm font-semibold text-red-600">{photoError}</p> : null}
+            </div>
+          </div>
+        </section>
+
+        {state.error ? (
+          <p role="alert" className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">
+            {state.error}
+          </p>
+        ) : null}
+
+        <button
+          type="submit"
+          disabled={!ready || pending}
+          className="inline-flex h-13 w-full items-center justify-center rounded-full bg-brand px-6 text-base font-black text-ink shadow-[0_18px_48px_rgba(0,239,139,0.25)] transition hover:-translate-y-0.5 hover:bg-ink hover:text-white disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:translate-y-0 disabled:hover:bg-brand disabled:hover:text-ink"
+        >
+          {pending ? "Saving your profile…" : "Create my profile"}
+        </button>
+      </form>
+    </Boundary>
+  );
+}

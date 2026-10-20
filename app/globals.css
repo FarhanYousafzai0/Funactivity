@@ -1,0 +1,111 @@
+@import "tailwindcss";
+
+@theme inline {
+  --color-brand: #00ef8b;
+  --color-brand-deep: #00a965;
+  --color-ink: #06110d;
+  --color-ink-soft: #123326;
+  --color-muted: #617069;
+  --color-mint: #eafff4;
+  --color-line: rgba(7, 31, 21, 0.13);
+  --color-gold: #ffbf3f;
+  --color-silver: #c9d4ce;
+  --color-bronze: #d9895b;
+  --color-client: #f59e0b;
+  --font-sans: var(--font-geist-sans), Arial, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+}
+
+/* Base styles live in the base layer so Tailwind utilities (like bg-ink on the board) can override them. */
+@layer base {
+  html {
+    background: #f5fbf8;
+  }
+
+  body {
+    margin: 0;
+    color: var(--color-ink);
+    background:
+      radial-gradient(circle at 12% 8%, rgba(0, 239, 139, 0.18), transparent 24%),
+      radial-gradient(circle at 88% 20%, rgba(0, 239, 139, 0.1), transparent 24%),
+      #f5fbf8;
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  button,
+  input,
+  textarea {
+    font: inherit;
+  }
+
+  button {
+    cursor: pointer;
+  }
+}
+
+/* Background grid like the leaderboard app. */
+.page-grid {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.46;
+  background-image: linear-gradient(var(--color-line) 1px, transparent 1px), linear-gradient(90deg, var(--color-line) 1px, transparent 1px);
+  background-size: 42px 42px;
+  mask-image: linear-gradient(to bottom, black, transparent 62%);
+}
+
+/* Teach mode: outlines every <Boundary> so students can see which part is server and which is client. */
+html[data-teach="on"] [data-boundary] {
+  position: relative;
+  outline: 2px dashed var(--color-brand-deep);
+  outline-offset: 6px;
+  border-radius: 14px;
+}
+
+html[data-teach="on"] [data-boundary="client"] {
+  outline-color: var(--color-client);
+}
+
+html[data-teach="on"] [data-boundary]::before {
+  content: attr(data-label);
+  position: absolute;
+  top: -18px;
+  left: 10px;
+  z-index: 5;
+  padding: 4px 9px;
+  border-radius: 999px;
+  background: var(--color-brand-deep);
+  color: white;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  max-width: calc(100% - 20px);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+html[data-teach="on"] [data-boundary="client"]::before {
+  background: var(--color-client);
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 5px rgba(0, 239, 139, 0.14);
+  }
+  50% {
+    box-shadow: 0 0 0 10px rgba(0, 239, 139, 0.04);
+  }
+}
+
+.live-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--color-brand);
+  animation: pulse 1.5s infinite;
+}
