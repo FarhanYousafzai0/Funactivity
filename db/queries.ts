@@ -14,8 +14,10 @@ export type Profile = {
   tagline: string | null;
     photoStyle: string | null;
   studies: string[];
-  interests: string[];
+    interests: string[];
   hasPhoto: boolean;
+  /** Changes when the photo changes, so <img> URLs never show a stale picture. */
+  photoVersion: string;
   hidden: boolean;
   createdAt: string;
 };
@@ -67,8 +69,9 @@ type ProfileRow = {
   tagline: string | null;
   photoStyle: string | null;
   studies: string | null;
-  interests: string | null;
+    interests: string | null;
   hasPhoto: number;
+  photoVersion: string;
   hidden: number;
   createdAt: string;
   pitchId?: string | null;
@@ -76,7 +79,7 @@ type ProfileRow = {
 };
 
 const PROFILE_COLUMNS =
-  "p.id, p.name, p.tagline, p.photo_style AS photoStyle, p.studies, p.interests, (p.photo IS NOT NULL) AS hasPhoto, p.hidden, p.created_at AS createdAt";
+  "p.id, p.name, p.tagline, p.photo_style AS photoStyle, p.studies, p.interests, (p.photo IS NOT NULL) AS hasPhoto, COALESCE(p.photo_updated_at, p.created_at) AS photoVersion, p.hidden, p.created_at AS createdAt";
 
 function toProfile(row: ProfileRow): Profile {
   return {
@@ -86,7 +89,8 @@ function toProfile(row: ProfileRow): Profile {
         photoStyle: row.photoStyle,
     studies: pickKeys(STUDY_OPTIONS, row.studies),
     interests: pickKeys(INTEREST_OPTIONS, row.interests),
-    hasPhoto: Boolean(row.hasPhoto),
+        hasPhoto: Boolean(row.hasPhoto),
+    photoVersion: row.photoVersion,
     hidden: Boolean(row.hidden),
     createdAt: row.createdAt,
   };
@@ -111,6 +115,11 @@ export async function createProfile(input: {
 export async function getProfile(id: string) {
   const row = await (await db()).prepare(`SELECT ${PROFILE_COLUMNS} FROM profiles p WHERE p.id = ?`).bind(id).first<ProfileRow>();
   return row ? toProfile(row) : null;
+}
+
+/** Replaces the photo (and the prompt style used for it). Bumps photo_updated_at so cached <img> URLs change. */
+export async function updateProfilePhoto(id: string, photo: string, photoStyle: string) {
+  await (await db()).prepare("UPDATE profiles SET photo = ?, photo_style = ?, photo_updated_at = ? WHERE id = ?").bind(photo, photoStyle, now(), id).run();
 }
 
 export async function getProfilePhoto(id: string) {
@@ -162,8 +171,9 @@ type EntryRow = {
   pTagline: string | null;
     pPhotoStyle: string | null;
   pStudies: string | null;
-  pInterests: string | null;
+    pInterests: string | null;
   pHasPhoto: number;
+  pPhotoVersion: string;
   pHidden: number;
   pCreatedAt: string;
   sProblem: number | null;
@@ -178,7 +188,7 @@ const ENTRY_SELECT = `
   SELECT t.id, t.profile_id AS profileId, t.title, t.problem, t.audience, t.solution,
          t.created_at AS createdAt, t.updated_at AS updatedAt,
          p.name AS pName, p.tagline AS pTagline, p.photo_style AS pPhotoStyle, p.studies AS pStudies, p.interests AS pInterests,
-         (p.photo IS NOT NULL) AS pHasPhoto, p.hidden AS pHidden, p.created_at AS pCreatedAt,
+         (p.photo IS NOT NULL) AS pHasPhoto, COALESCE(p.photo_updated_at, p.created_at) AS pPhotoVersion, p.hidden AS pHidden, p.created_at AS pCreatedAt,
          s.problem AS sProblem, s.solution AS sSolution, s.ai_use AS sAiUse, s.clarity AS sClarity,
          s.note AS sNote, s.scored_at AS scoredAt
   FROM pitches t
@@ -208,7 +218,8 @@ function toEntry(row: EntryRow): PitchEntry {
             photoStyle: row.pPhotoStyle,
       studies: pickKeys(STUDY_OPTIONS, row.pStudies),
       interests: pickKeys(INTEREST_OPTIONS, row.pInterests),
-      hasPhoto: Boolean(row.pHasPhoto),
+            hasPhoto: Boolean(row.pHasPhoto),
+      photoVersion: row.pPhotoVersion,
       hidden: Boolean(row.pHidden),
       createdAt: row.pCreatedAt,
     },

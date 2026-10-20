@@ -2,13 +2,14 @@
 
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { createProfile } from "@/db/queries";
-import { cookieOptions, PROFILE_COOKIE, profileToken } from "@/lib/auth";
+import { createProfile, getProfile, updateProfilePhoto } from "@/db/queries";
+import { revalidatePath } from "next/cache";
+import { cookieOptions, currentProfileId, PROFILE_COOKIE, profileToken } from "@/lib/auth";
 import { isPhotoStyle } from "@/lib/photo-prompt";
 import { INTEREST_OPTIONS, MAX_INTERESTS, pickKeys, STUDY_OPTIONS } from "@/lib/profile-options";
 import { cleanText, LIMITS, photoError, textError } from "@/lib/validation";
 
-export type ProfileFormState = { error: string | null };
+export type ProfileFormState = { error: string | null; savedAt?: string };
 
 /** Returns only paths inside this app, so a crafted ?next= can never send someone elsewhere. */
 function safeNext(value: unknown, fallback: string) {
@@ -41,6 +42,27 @@ export async function createProfileAction(_previous: ProfileFormState, formData:
 
   const next = safeNext(formData.get("next"), "");
   redirect(`/profile/${id}?welcome=1${next ? `&next=${encodeURIComponent(next)}` : ""}`);
+}
+
+/** Owner only: replaces the profile photo. The browser already resized it; the server checks it again. */
+export async function updatePhotoAction(_previous: ProfileFormState, formData: FormData): Promise<ProfileFormState> {
+  const ownerId = await currentProfileId();
+  const profileId = formData.get("profileId");
+  if (!ownerId || ownerId !== profileId) return { error: "This profile belongs to another device. Open it on the phone that created it." };
+  const profile = await getProfile(ownerId);
+  if (!profile || profile.hidden) return { error: "This profile is no longer available." };
+
+  const photo = formData.get("photo");
+  const style = formData.get("photoStyle");
+  const error = photoError(photo) ?? (isPhotoStyle(style) ? null : "Pick a photo style.");
+  if (error) return { error };
+
+  await updateProfilePhoto(ownerId, photo as string, style as string);
+  revalidatePath(`/profile/${ownerId}`);
+  revalidatePath("/");
+  revalidatePath("/board");
+  revalidatePath("/admin");
+  return { error: null, savedAt: new Date().toISOString() };
 }
 
 /** "Not you?" — forgets the profile cookie on this device. The profile itself stays. */

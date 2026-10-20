@@ -23,15 +23,16 @@ export function Avatar({
   size = "md",
   className = "",
 }: {
-  profile: { id: string; name: string; hasPhoto: boolean };
+  profile: { id: string; name: string; hasPhoto: boolean; photoVersion?: string };
   size?: keyof typeof SIZES;
   className?: string;
 }) {
   const base = `${SIZES[size]} aspect-square shrink-0 overflow-hidden rounded-full border-white bg-brand shadow-[0_12px_30px_rgba(0,182,108,0.18)] ${className}`;
   if (profile.hasPhoto) {
     // The image is a data URL stored in our own database, so next/image optimisation has nothing to add.
+    const version = profile.photoVersion ? `?v=${encodeURIComponent(profile.photoVersion)}` : "";
     // eslint-disable-next-line @next/next/no-img-element
-    return <img src={`/photo/${profile.id}`} alt={profile.name} className={`${base} block object-cover object-top`} loading="lazy" />;
+    return <img src={`/photo/${profile.id}${version}`} alt={profile.name} className={`${base} block object-cover object-top`} loading="lazy" />;
   }
   return (
     <div className={`${base} flex items-center justify-center font-black text-ink`} aria-label={profile.name}>

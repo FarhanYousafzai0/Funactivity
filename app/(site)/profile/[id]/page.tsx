@@ -4,6 +4,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { forgetProfileAction } from "@/app/actions/profile";
 import { Avatar } from "@/components/Avatar";
+import { PhotoUpdater } from "@/components/PhotoUpdater";
 import { getPitchForProfile, getProfile } from "@/db/queries";
 import { currentProfileId, isAdmin } from "@/lib/auth";
 import { firstName, formatTime } from "@/lib/format";
@@ -79,7 +80,8 @@ export default async function ProfilePage({ params, searchParams }: Props) {
 
       <div className="rounded-3xl border border-line bg-white/85 p-8 text-center shadow-[0_24px_60px_rgba(7,17,13,0.08)] backdrop-blur">
         <Avatar profile={profile} size="xl" className="mx-auto" />
-        <h1 className="mt-5 text-3xl font-black tracking-tight">{profile.name}</h1>
+          {owner ? <PhotoUpdater profileId={profile.id} photoStyle={profile.photoStyle} /> : null}
+          <h1 className="mt-5 text-3xl font-black tracking-tight">{profile.name}</h1>
         {profile.tagline ? <p className="mt-1 text-muted">{profile.tagline}</p> : null}
         <p className="mt-3 font-mono text-[11px] font-bold uppercase tracking-[0.14em] text-muted">
           Joined at {formatTime(profile.createdAt)}

@@ -11,6 +11,7 @@ export const SCHEMA_SQL = [
     photo_style TEXT,
     studies TEXT,
     interests TEXT,
+    photo_updated_at TEXT,
     hidden INTEGER NOT NULL DEFAULT 0,
     created_at TEXT NOT NULL
   )`,
@@ -39,6 +40,7 @@ export const SCHEMA_SQL = [
 export const PROFILE_COLUMNS_ADDED: { name: string; sql: string }[] = [
   { name: "studies", sql: "ALTER TABLE profiles ADD COLUMN studies TEXT" },
   { name: "interests", sql: "ALTER TABLE profiles ADD COLUMN interests TEXT" },
+  { name: "photo_updated_at", sql: "ALTER TABLE profiles ADD COLUMN photo_updated_at TEXT" },
 ];
 
 export async function applySchema(db: Database) {
