@@ -55,43 +55,6 @@
   mask-image: linear-gradient(to bottom, black, transparent 62%);
 }
 
-/* Teach mode: outlines every <Boundary> so students can see which part is server and which is client. */
-html[data-teach="on"] [data-boundary] {
-  position: relative;
-  outline: 2px dashed var(--color-brand-deep);
-  outline-offset: 6px;
-  border-radius: 14px;
-}
-
-html[data-teach="on"] [data-boundary="client"] {
-  outline-color: var(--color-client);
-}
-
-html[data-teach="on"] [data-boundary]::before {
-  content: attr(data-label);
-  position: absolute;
-  top: -18px;
-  left: 10px;
-  z-index: 5;
-  padding: 4px 9px;
-  border-radius: 999px;
-  background: var(--color-brand-deep);
-  color: white;
-  font-family: var(--font-mono);
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  white-space: nowrap;
-  max-width: calc(100% - 20px);
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-html[data-teach="on"] [data-boundary="client"]::before {
-  background: var(--color-client);
-}
-
 @keyframes pulse {
   0%,
   100% {

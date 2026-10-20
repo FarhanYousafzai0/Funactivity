@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { Avatar } from "@/components/Avatar";
-import { Boundary } from "@/components/Boundary";
 import { getPitchForProfile, getProfile } from "@/db/queries";
 import { currentProfileId } from "@/lib/auth";
 import { firstName } from "@/lib/format";
@@ -22,18 +21,16 @@ export default async function NewPitchPage() {
 
   return (
     <div className="mx-auto max-w-2xl">
-      <Boundary kind="server" label="checks your cookie and loads your profile before the form is sent">
-        <div className="flex items-center gap-4">
-          <Avatar profile={profile} size="md" />
-          <div>
-            <p className="font-mono text-[11px] font-bold uppercase tracking-[0.16em] text-brand-deep">Step 2 of 2 · pitching as {firstName(profile.name)}</p>
-            <h1 className="mt-1 text-4xl font-black tracking-tight">{entry ? "Edit your pitch" : "Pitch your idea"}</h1>
-          </div>
+      <div className="flex items-center gap-4">
+        <Avatar profile={profile} size="md" />
+        <div>
+          <p className="font-mono text-[11px] font-bold uppercase tracking-[0.16em] text-brand-deep">Step 2 of 2 · pitching as {firstName(profile.name)}</p>
+          <h1 className="mt-1 text-4xl font-black tracking-tight">{entry ? "Edit your pitch" : "Pitch your idea"}</h1>
         </div>
-        <p className="mt-3 text-muted">
-          Think Shark Tank, two minutes, no slides. A real problem you or people around you face, and how AI could solve it.
-        </p>
-      </Boundary>
+      </div>
+      <p className="mt-3 text-muted">
+        Think Shark Tank, two minutes, no slides. A real problem you or people around you face, and how AI could solve it.
+      </p>
       <div className="mt-8">
         <PitchForm defaults={entry?.pitch ?? null} />
       </div>

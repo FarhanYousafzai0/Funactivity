@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Avatar } from "@/components/Avatar";
-import { Boundary } from "@/components/Boundary";
 import { leaderboard, stats } from "@/db/queries";
 import { firstName, formatTime } from "@/lib/format";
 import { MAX_TOTAL } from "@/lib/scoring";
@@ -24,9 +23,7 @@ export default async function BoardPage() {
     // Rendered inside the bare (board) layout: no site header, dark page, built for a projector.
     <div className="min-h-svh text-white">
       <div className="mx-auto w-full max-w-6xl px-5 py-6 sm:px-8">
-        <Boundary kind="client" label="a tiny client component asks the server for a fresh page every 10 s">
-          <AutoRefresh seconds={10} />
-        </Boundary>
+        <AutoRefresh seconds={10} />
 
         <header className="flex flex-wrap items-center justify-between gap-4">
           <div>
@@ -43,7 +40,7 @@ export default async function BoardPage() {
           </div>
         </header>
 
-        <Boundary kind="server" label="ranking computed on the server from the scores table" className="mt-8">
+        <div className="mt-8">
           {scored.length === 0 ? (
             <div className="rounded-3xl border border-dashed border-white/20 p-12 text-center">
               <p className="text-2xl font-black">No scores yet</p>
@@ -88,7 +85,7 @@ export default async function BoardPage() {
               ) : null}
             </>
           )}
-        </Boundary>
+        </div>
 
         {waiting.length > 0 ? (
           <section className="mt-8">

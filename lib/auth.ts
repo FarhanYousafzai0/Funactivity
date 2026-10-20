@@ -4,7 +4,6 @@ import { issueToken, readToken, safeEqual, sign } from "./tokens";
 
 export const PROFILE_COOKIE = "pa_profile";
 export const ADMIN_COOKIE = "pa_admin";
-export const TEACH_COOKIE = "pa_teach";
 
 const THIRTY_DAYS = 60 * 60 * 24 * 30;
 
@@ -52,11 +51,4 @@ export async function isAdmin() {
 
 export async function requireAdmin(nextPath: string) {
   if (!(await isAdmin())) redirect(`/admin/login?next=${encodeURIComponent(nextPath)}`);
-}
-
-// ---- Teach mode: shows the server/client outlines. ----
-
-export async function isTeachMode() {
-  const jar = await cookies();
-  return jar.get(TEACH_COOKIE)?.value === "on";
 }

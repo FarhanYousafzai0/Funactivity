@@ -2,8 +2,8 @@
 
 Next.js (App Router) app for the **NextGen AI Bootcamp** "Pitch us a business idea" activity. Students create a
 profile with an AI-generated photo, optionally pitch a business idea (Shark-Tank style), and the judges score every
-pitch on a four-point rubric. A dark **live board** shows the ranking on the projector. The app also teaches
-**server side vs client side**: a header toggle outlines every server part green and every client part orange.
+pitch on a four-point rubric. A dark **live board** shows the ranking on the projector. `/learn` explains
+**server side vs client side** using the app's own pages.
 
 Data lives in **Turso** (hosted libSQL/SQLite) in production and in the file `local.db` locally. Deploys to **Vercel**.
 
@@ -30,7 +30,7 @@ Data lives in **Turso** (hosted libSQL/SQLite) in production and in the file `lo
 4. **Judges** sign in at `/admin` with `ADMIN_PASSWORD`, score each pitch 1–5 on four criteria (max 20) and can leave a
    note the student sees. Hiding a profile removes it from every public page without deleting anything.
 5. Keep `/board` open on the projector. It re-renders on the server every 10 seconds.
-6. Turn on **Teach mode** in the header to show which parts run where. `/learn` has the explanation.
+6. Open `/learn` with the students for the server side vs client side explanation.
 
 ## Local development
 
@@ -64,6 +64,4 @@ Without `TURSO_DATABASE_URL` the app uses `local.db`. Tables are created automat
 - `db/client.ts` — libSQL client (same pattern as the ai-skool repo's `apps/ai-skool-leaderboard`); `db/queries.ts` — all SQL.
 - `app/actions/*.ts` — Server Actions. Every rule is checked here; the forms only give early feedback.
 - `lib/auth.ts` — the two cookies: `pa_profile` (signed profile id) and `pa_admin` (HMAC of the password).
-- `components/Boundary.tsx` — the teach-mode wrapper. CSS in `app/globals.css` draws the outlines only while
-  `<html data-teach="on">`.
 - Two root layouts: `app/(site)` has the header and footer; `app/(board)` is the bare dark projector layout.

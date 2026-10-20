@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import { isTeachMode } from "@/lib/auth";
 import "../globals.css";
 
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
@@ -14,10 +13,9 @@ export const metadata: Metadata = {
 };
 
 // A second root layout just for the projector board: no header, no footer, dark background.
-export default async function BoardLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  const teach = await isTeachMode();
+export default function BoardLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" data-teach={teach ? "on" : "off"} className={`${geistSans.variable} ${geistMono.variable} bg-ink`}>
+    <html lang="en" className={`${geistSans.variable} ${geistMono.variable} bg-ink`}>
       <body className="min-h-svh bg-ink text-white">{children}</body>
     </html>
   );

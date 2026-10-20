@@ -2,7 +2,6 @@
 
 import { useActionState, useState } from "react";
 import { savePitchAction, type PitchFormState } from "@/app/actions/pitch";
-import { Boundary } from "@/components/Boundary";
 import type { Pitch } from "@/db/queries";
 import { RUBRIC } from "@/lib/scoring";
 import { LIMITS } from "@/lib/validation";
@@ -51,65 +50,63 @@ export function PitchForm({ defaults }: { defaults: Pitch | null }) {
   const complete = FIELDS.every((field) => values[field.key].trim().length > 0 && values[field.key].length <= LIMITS[field.key]);
 
   return (
-    <Boundary kind="client" label="live counters and validation happen in your browser">
-      <form action={formAction} className="space-y-5">
-        <section className="rounded-3xl border border-line bg-white/85 p-5 shadow-[0_24px_60px_rgba(7,17,13,0.06)] backdrop-blur sm:p-6">
-          {FIELDS.map((field) => (
-            <label key={field.key} className="mt-4 block text-sm font-semibold first:mt-0">
-              {field.label}
-              <span className="ml-2 font-normal text-muted">{field.help}</span>
-              {field.rows ? (
-                <textarea
-                  name={field.key}
-                  value={values[field.key]}
-                  onChange={(event) => setValues({ ...values, [field.key]: event.target.value })}
-                  rows={field.rows}
-                  maxLength={LIMITS[field.key] + 50}
-                  required
-                  placeholder={field.placeholder}
-                  className={`${fieldClass} resize-y`}
-                />
-              ) : (
-                <input
-                  name={field.key}
-                  value={values[field.key]}
-                  onChange={(event) => setValues({ ...values, [field.key]: event.target.value })}
-                  maxLength={LIMITS[field.key] + 20}
-                  required
-                  placeholder={field.placeholder}
-                  className={fieldClass}
-                />
-              )}
-              <Counter value={values[field.key].length} max={LIMITS[field.key]} />
-            </label>
+    <form action={formAction} className="space-y-5">
+      <section className="rounded-3xl border border-line bg-white/85 p-5 shadow-[0_24px_60px_rgba(7,17,13,0.06)] backdrop-blur sm:p-6">
+        {FIELDS.map((field) => (
+          <label key={field.key} className="mt-4 block text-sm font-semibold first:mt-0">
+            {field.label}
+            <span className="ml-2 font-normal text-muted">{field.help}</span>
+            {field.rows ? (
+              <textarea
+                name={field.key}
+                value={values[field.key]}
+                onChange={(event) => setValues({ ...values, [field.key]: event.target.value })}
+                rows={field.rows}
+                maxLength={LIMITS[field.key] + 50}
+                required
+                placeholder={field.placeholder}
+                className={`${fieldClass} resize-y`}
+              />
+            ) : (
+              <input
+                name={field.key}
+                value={values[field.key]}
+                onChange={(event) => setValues({ ...values, [field.key]: event.target.value })}
+                maxLength={LIMITS[field.key] + 20}
+                required
+                placeholder={field.placeholder}
+                className={fieldClass}
+              />
+            )}
+            <Counter value={values[field.key].length} max={LIMITS[field.key]} />
+          </label>
+        ))}
+      </section>
+
+      <aside className="rounded-3xl border border-dashed border-line bg-mint/50 p-5">
+        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-brand-deep">What the judges score · 1 to 5 each</p>
+        <ul className="mt-2 grid gap-1 text-sm sm:grid-cols-2">
+          {RUBRIC.map((item) => (
+            <li key={item.key}>
+              <span className="font-bold">{item.label}.</span> <span className="text-muted">{item.hint}</span>
+            </li>
           ))}
-        </section>
+        </ul>
+      </aside>
 
-        <aside className="rounded-3xl border border-dashed border-line bg-mint/50 p-5">
-          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-brand-deep">What the judges score · 1 to 5 each</p>
-          <ul className="mt-2 grid gap-1 text-sm sm:grid-cols-2">
-            {RUBRIC.map((item) => (
-              <li key={item.key}>
-                <span className="font-bold">{item.label}.</span> <span className="text-muted">{item.hint}</span>
-              </li>
-            ))}
-          </ul>
-        </aside>
+      {state.error ? (
+        <p role="alert" className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">
+          {state.error}
+        </p>
+      ) : null}
 
-        {state.error ? (
-          <p role="alert" className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">
-            {state.error}
-          </p>
-        ) : null}
-
-        <button
-          type="submit"
-          disabled={!complete || pending}
-          className="inline-flex h-13 w-full items-center justify-center rounded-full bg-brand px-6 text-base font-black text-ink shadow-[0_18px_48px_rgba(0,239,139,0.25)] transition hover:-translate-y-0.5 hover:bg-ink hover:text-white disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:translate-y-0 disabled:hover:bg-brand disabled:hover:text-ink"
-        >
-          {pending ? "Sending to the judges…" : defaults ? "Save changes" : "Submit my pitch"}
-        </button>
-      </form>
-    </Boundary>
+      <button
+        type="submit"
+        disabled={!complete || pending}
+        className="inline-flex h-13 w-full items-center justify-center rounded-full bg-brand px-6 text-base font-black text-ink shadow-[0_18px_48px_rgba(0,239,139,0.25)] transition hover:-translate-y-0.5 hover:bg-ink hover:text-white disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:translate-y-0 disabled:hover:bg-brand disabled:hover:text-ink"
+      >
+        {pending ? "Sending to the judges…" : defaults ? "Save changes" : "Submit my pitch"}
+      </button>
+    </form>
   );
 }

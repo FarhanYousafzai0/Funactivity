@@ -1,6 +1,5 @@
 import Image from "next/image";
 import Link from "next/link";
-import { toggleTeachMode } from "@/app/actions/teach";
 
 const links = [
   { href: "/", label: "Arena" },
@@ -8,7 +7,7 @@ const links = [
   { href: "/learn", label: "How it works" },
 ];
 
-export function SiteHeader({ teach }: { teach: boolean }) {
+export function SiteHeader() {
   return (
     <header className="relative z-[2] mx-auto flex w-full max-w-5xl flex-wrap items-center justify-between gap-3 px-4 pt-5 sm:px-6">
       <Link href="/" className="flex items-center gap-3" aria-label="Pitch Arena home">
@@ -24,19 +23,6 @@ export function SiteHeader({ teach }: { teach: boolean }) {
             {link.label}
           </Link>
         ))}
-        {/* A plain form posting to a server action: it works before any JavaScript loads. */}
-        <form action={toggleTeachMode}>
-          <button
-            type="submit"
-            title="Show which parts of each page run on the server and which run in your browser"
-            className={`ml-1 inline-flex items-center gap-2 rounded-full border px-3 py-1.5 font-mono text-[11px] font-bold uppercase tracking-[0.08em] transition ${
-              teach ? "border-brand-deep bg-ink text-brand" : "border-line bg-white/70 text-muted hover:text-ink"
-            }`}
-          >
-            <span className={`size-2 rounded-full ${teach ? "bg-brand" : "bg-line"}`} />
-            Teach mode {teach ? "on" : "off"}
-          </button>
-        </form>
       </nav>
     </header>
   );

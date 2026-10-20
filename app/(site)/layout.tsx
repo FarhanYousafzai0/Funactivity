@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import Link from "next/link";
 import { SiteHeader } from "@/components/SiteHeader";
-import { isTeachMode } from "@/lib/auth";
 import "../globals.css";
 
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
@@ -15,15 +14,12 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  // The layout runs on the server for every request: it reads the teach-mode cookie
-  // and tells the CSS (via data-teach) whether to draw the server/client outlines.
-  const teach = await isTeachMode();
+export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" data-teach={teach ? "on" : "off"} className={`${geistSans.variable} ${geistMono.variable}`}>
+    <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
       <body className="flex min-h-svh flex-col">
         <div className="page-grid" aria-hidden />
-        <SiteHeader teach={teach} />
+        <SiteHeader />
         <main className="relative z-[1] mx-auto w-full max-w-5xl flex-1 px-4 pb-16 pt-6 sm:px-6">{children}</main>
         <footer className="relative z-[1] mx-auto flex w-full max-w-5xl flex-wrap items-center justify-between gap-2 px-4 pb-6 text-xs text-muted sm:px-6">
           <span>
