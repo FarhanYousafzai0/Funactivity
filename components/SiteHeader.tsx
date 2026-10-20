@@ -23,6 +23,12 @@ export function SiteHeader() {
             {link.label}
           </Link>
         ))}
+        <Link
+          href="/admin"
+          className="ml-1 inline-flex h-9 items-center rounded-full bg-ink px-4 font-mono text-[11px] font-black uppercase tracking-[0.08em] text-white transition hover:bg-ink-soft"
+        >
+          Judges
+        </Link>
       </nav>
     </header>
   );

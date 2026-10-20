@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { forgetProfileAction } from "@/app/actions/profile";
 import { Avatar } from "@/components/Avatar";
-import { getPitchForProfile, getProfile, listProfiles, stats } from "@/db/queries";
+import { getPitchForProfile, getProfile, leaderboard, listProfiles, stats } from "@/db/queries";
 import { currentProfileId } from "@/lib/auth";
 import { firstName } from "@/lib/format";
 import { MAX_TOTAL } from "@/lib/scoring";
@@ -17,13 +17,21 @@ export default async function HomePage() {
   // All of this runs on the server: the cookie is read, the database is queried,
   // and the browser receives finished HTML.
   const profileId = await currentProfileId();
-  const [me, myPitch, profiles, counts] = await Promise.all([
+  const [me, myPitch, profiles, ranked, counts] = await Promise.all([
     profileId ? getProfile(profileId) : null,
     profileId ? getPitchForProfile(profileId) : null,
     listProfiles(),
+    leaderboard(),
     stats(),
   ]);
   const signedIn = me && !me.hidden ? me : null;
+
+  // One row per student: scored pitches first (by rank), then pitches waiting for the judges,
+  // then students who have not pitched yet.
+  const rows = [
+    ...ranked.map((entry) => ({ profile: entry.profile, pitch: entry.pitch, total: entry.total, rank: entry.rank })),
+    ...profiles.filter((profile) => !profile.pitchId).map((profile) => ({ profile, pitch: null, total: null, rank: null })),
+  ];
 
   return (
     <div className="space-y-12">
@@ -106,7 +114,7 @@ export default async function HomePage() {
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
             <h2 className="text-2xl font-black">In the arena</h2>
-            <p className="text-sm text-muted">Everyone who has created a profile so far.</p>
+            <p className="text-sm text-muted">Everyone who has created a profile, their pitch, and the judges&apos; score once it is given.</p>
           </div>
           <Link href="/board" className="inline-flex items-center gap-2 rounded-full border border-line bg-white/80 px-4 py-2 text-sm font-semibold">
             <span className="live-dot" /> Open the live board
@@ -126,24 +134,59 @@ export default async function HomePage() {
           ))}
         </dl>
 
-        {profiles.length === 0 ? (
+        {rows.length === 0 ? (
           <p className="mt-6 rounded-2xl border border-dashed border-line p-6 text-center text-muted">Nobody yet. Be the first one in.</p>
         ) : (
-          <ul className="mt-6 grid grid-cols-3 gap-3 sm:grid-cols-4 md:grid-cols-6">
-            {profiles.map((profile) => (
-              <li key={profile.id}>
-                <Link href={profile.pitchId ? `/pitch/${profile.pitchId}` : `/profile/${profile.id}`} className="group flex flex-col items-center gap-2 text-center">
-                  <Avatar profile={profile} size="md" className="transition group-hover:-translate-y-1" />
-                  <span className="line-clamp-2 text-sm font-semibold leading-tight">{profile.name}</span>
-                  {profile.scored ? (
-                    <span className="rounded-full bg-ink px-2 py-0.5 font-mono text-[9px] font-bold uppercase tracking-wider text-brand">Scored</span>
-                  ) : profile.pitchId ? (
-                    <span className="rounded-full bg-brand/30 px-2 py-0.5 font-mono text-[9px] font-bold uppercase tracking-wider text-ink">Pitched</span>
-                  ) : null}
-                </Link>
-              </li>
-            ))}
-          </ul>
+          <div className="mt-6 overflow-x-auto rounded-3xl border border-line bg-white/85 shadow-[0_20px_55px_rgba(14,50,33,0.06)]">
+            <table className="w-full min-w-[640px] text-left text-sm">
+              <thead className="border-b border-line font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-muted">
+                <tr>
+                  <th className="w-14 px-4 py-3">#</th>
+                  <th className="px-4 py-3">Student</th>
+                  <th className="px-4 py-3">Pitch idea</th>
+                  <th className="w-32 px-4 py-3 text-right">Score</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-line">
+                {rows.map((row) => (
+                  <tr key={row.profile.id} className={row.rank === 1 ? "bg-brand/15" : ""}>
+                    <td className="px-4 py-3 font-mono text-lg font-black text-muted">{row.rank ?? "–"}</td>
+                    <td className="px-4 py-3">
+                      <Link href={`/profile/${row.profile.id}`} className="flex items-center gap-3">
+                        <Avatar profile={row.profile} size="sm" />
+                        <span>
+                          <span className="block font-bold">{row.profile.name}</span>
+                          {row.profile.tagline ? <span className="block text-xs text-muted">{row.profile.tagline}</span> : null}
+                        </span>
+                      </Link>
+                    </td>
+                    <td className="px-4 py-3">
+                      {row.pitch ? (
+                        <Link href={`/pitch/${row.pitch.id}`} className="block">
+                          <span className="block font-semibold text-brand-deep">{row.pitch.title}</span>
+                          <span className="block text-xs leading-5 text-muted">{row.pitch.problem}</span>
+                        </Link>
+                      ) : (
+                        <span className="text-xs text-muted">No pitch yet</span>
+                      )}
+                    </td>
+                    <td className="px-4 py-3 text-right">
+                      {row.total !== null ? (
+                        <span className="font-mono text-2xl font-black">
+                          {row.total}
+                          <span className="text-xs text-muted">/{MAX_TOTAL}</span>
+                        </span>
+                      ) : row.pitch ? (
+                        <span className="rounded-full bg-brand/30 px-2 py-0.5 font-mono text-[9px] font-bold uppercase tracking-wider text-ink">Waiting</span>
+                      ) : (
+                        <span className="text-xs text-muted">–</span>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </section>
     </div>
